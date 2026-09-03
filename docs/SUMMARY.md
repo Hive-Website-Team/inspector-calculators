@@ -1,75 +1,78 @@
-# Task 1 — kya hua, kya nahi
+# Task 1 — what shipped, what didn't
 
-2026-09-04 · Branch `task-1-calculators` · Deploy nahi hua, `main` pe merge nahi hua
+2026-09-04 · Branch `task-1-calculators` · Not deployed, not merged to `main`
 
 ---
 
-## ✅ Ho gaya
+## ✅ Done
 
 | | |
 |---|---|
-| **11 calculators** | §6 kehta hai 11 banao, 10 se launch. 11 hain. |
-| Har calculator ka source | Har ek ke paas primary source + date. Bina source ke build hi fail hoti hai. |
-| Pages | Home, 8 categories, methodology, about, changelog |
-| Build gate | Todke test kiya — fail hota hai. Theek karke — pass. |
-| Source check script | §9 ne maanga tha, tha nahi. Ab hai. |
-| Design | Omni + calculator.net + electricaltoolbox — teeno §0 me likhe hain |
-| Mobile | 16/16 pages, 360px aur 390px pe saaf |
-| Git repo | Naya, public, branch pe kaam, `main` chhua nahi |
+| **11 calculators** | §6 asks for 11, ships at 10. Eleven ship. |
+| Every calculator sourced | Each one carries a primary source with the date it was checked. The build fails without one. |
+| Pages | Home, 8 category pages, methodology, about, changelog |
+| Build gate | Proven both ways — broke a record, build failed; restored it, build passed |
+| Source-check script | §9 required it, it didn't exist. It does now. |
+| Design | omnicalculator + calculator.net + electricaltoolbox, the three named in §0 |
+| Mobile | 16/16 pages clean at 360px and 390px |
+| Repo | New, public, work on a branch, `main` untouched |
 
-### Checks ka output
+### Check output
 
 ```
 Content check passed — 11 calculators, every one carries a sourced assumption
 SSR check passed     — 23 URLs, all resolve with server-rendered schema
 Source check passed  — 10 of 10 source URLs return 200
 Lighthouse mobile    — 96 / 96 / 100 / 100
-JS band karke        — 11/11 calculators poora result dikhate hain
-Mobile 360 & 390px   — 16/16 pages, side scroll nahi
+JS disabled          — 11/11 calculators show a complete computed result
+Mobile 360 & 390px   — 16/16 pages, no horizontal scroll
 ```
 
-### Numbers yaad se nahi likhe — source se verify kiye
+### Numbers verified against the source, not written from memory
 
-- Deck joist ke 12 ke 12 value AWC DCA 6-15 ki PDF nikaal ke Table 2 se milaye
-- Roof slopes IRC 2021 R905 ke free public text se padhe
-- Vendor pricing Spectora, ISN, Palm-Tech ke apne page se, 2026-09-04 ko
+- All 12 Southern Pine values checked cell by cell against AWC DCA 6-15 Table 2, extracted from the PDF
+- Roof slopes read from the free public IRC 2021 R905 text (ICC's own viewer paywalls it)
+- Vendor pricing taken off Spectora, ISN and Palm-Tech's own pages, each dated 2026-09-04
 
 ---
 
-## ❌ Nahi hua
+## ❌ Not done
 
-| | Kyu |
+| | Why |
 |---|---|
-| **Water Heater calculator** | Iska ek hi source tha — DOE ka page. Wo page aur poora `energy.gov/energysaver` section internet se hat gaya. 5 URL try kiye, sab 404. Bina source ke ship karne se accha hataya. §2.1 yahi kehta hai. `/changelog` me likh diya. |
-| **Deploy** | Domain nahi hai |
-| **Google Search Console / Bing / IndexNow** | Live domain ke bina nahi ho sakta |
-| **Rich Results Test** | Public URL chahiye |
-| **Baseline AI screenshots** | Live site ke baad |
-| **Design brief approval** | Alka ka kaam |
+| **Water Heater calculator** | Its only source was a DOE sizing page. That page — and the entire `energy.gov/energysaver` section — is gone. Five replacement URLs checked, all 404. Removed rather than shipped unsourced, per README §2.1, and logged in `/changelog`. |
+| **Deploy** | No domain yet |
+| **Search Console / Bing / IndexNow** | Needs a live domain |
+| **Rich Results Test** | Needs a public URL |
+| **Baseline AI screenshots** | After the site is live |
+| **Design brief approval** | Yours to sign off |
 
 ---
 
-## ⏳ Alka pe pending — 5 faisle
+## ⏳ Five decisions for Alka
 
-**1. Domain + `NEXT_PUBLIC_SITE_URL`**
-Aur ye confirm karna ki domain **Cloudflare Managed robots.txt ke peeche nahi** hoga.
-Ye sabse zaroori hai — yahi galti hiveinspect.com ke mahine kha gayi thi.
+**1. Domain and `NEXT_PUBLIC_SITE_URL`**
+Please also confirm the domain will **not** sit behind Cloudflare Managed robots.txt.
+This is the one that matters most — it's the mistake that cost hiveinspect.com months.
 
-**2. Vercel** — project banao, `--prod` aap chalao.
+**2. Vercel** — create the project, and you run `--prod`.
 
-**3. Design brief approve** (`docs/design-brief.md`)
-Ek sawaal khula hai: system font rakhein (meri salah) ya Inter + JetBrains Mono.
+**3. Design brief sign-off** (`docs/design-brief.md`)
+One open question: keep the system font stack (my recommendation — zero network cost,
+and Lighthouse ≥ 90 is a launch requirement) or switch to Inter + JetBrains Mono.
 
-**4. Revenue Goal ka Investopedia source**
-Link zinda hai, par Investopedia *secondary* source hai — README §2.2 mana karta hai.
-Aur §6 kehta hai is calculator ko koi external source chahiye hi nahi.
-Par schema kam se kam 1 source maangta hai. Isliye faisla chahiye.
+**4. The Revenue Goal citation**
+It cites Investopedia. The URL is live, but Investopedia is a *secondary* source, which
+README §2.2 forbids, and §6 says that calculator should cite nothing external. Removing it
+makes the record fail the gate's "at least one sourced assumption" rule. Either add a
+`derivation` source type to the schema for pure-arithmetic calculators, or leave it as-is.
+The schema change touches the build gate, so it needs your sign-off.
 
-**5. Repo ki jagah** — abhi `~/websites/inspector-calculators`, GitHub pe public.
+**5. Repo location** — currently `~/websites/inspector-calculators`, public on GitHub.
 
 ---
 
-## 🚨 Deploy ke turant baad ye chalana
+## 🚨 Run this the moment it deploys
 
 ```bash
 curl -A "GPTBot" https://<domain>/robots.txt
@@ -77,23 +80,32 @@ curl -A "ClaudeBot" https://<domain>/robots.txt
 curl -A "OAI-SearchBot" https://<domain>/robots.txt
 ```
 
-Explicit `Allow` groups dikhne chahiye, aur **kahin bhi bare `Disallow: /` nahi**.
-Agar dikhe → domain Cloudflare ke peeche hai → ruk jaao, pehle wo theek karo.
+You should see the explicit `Allow` groups and **no bare `Disallow: /` above them**.
+If one appears, the domain is behind Cloudflare Managed robots.txt — stop there and fix
+that before anything else.
 
 ---
 
-## 📌 Chhoti baatein dhyaan dene layak
+## 📌 Smaller things worth a look
 
-- **Effective hourly rate** (profitability calculator) revenue ko sirf drive+report time se divide karta hai — site pe lage time ko chhodta hai. Isse $432/hr aata hai, jo koi maanega nahi. Task ki apni input list me inspection duration hai hi nahi, to code spec ke hisaab se sahi hai — spec galat hai. Bolo to theek kar doon.
-- **§4 ka `grep -c` check chal hi nahi sakta.** `grep -c` lines ginta hai, Next.js sab ek line me daal deta hai — hamesha 1 aayega. Asli count 3 hai. Task file me `grep -o … | wc -l` hona chahiye.
-- **§3 kehta hai source URL "unique" ho.** Spectora ka pricing page 4 calculators me hai. Mujhe theek lagta hai — ek vendor ka page 4 jagah use hona normal hai. Aap literally lete ho to bata dena.
-- **`gray-matter`** install hai par use nahi ho raha. Nuksan nahi.
-- **2 category pages khali hain** — electrical aur hvac. §5 aathon maangta hai, isliye aathon hain. §10 ki list se bharenge.
+- **Effective hourly rate** on the profitability calculator divides *revenue* (not profit)
+  by drive plus report time only, excluding time on site. The worked example reports
+  $432/hr, which no inspector will believe. §6's own input list omits inspection duration,
+  so the code follows the spec — the spec is what's off. Say the word and I'll fix it.
+- **§4's `grep -c` check cannot pass as written.** `grep -c` counts lines and Next.js
+  minifies the page onto one, so it always returns 1. The real count is 3 blocks. The task
+  file should say `grep -o … | wc -l`.
+- **§3 says source URLs must be "unique."** `spectora.com/pricing/` is cited by four
+  calculators. Reusing one vendor's pricing page across four tools looks correct to me, so
+  the gate allows it — flagging in case you read that requirement literally.
+- **`gray-matter`** is installed per §2 but unused. Harmless.
+- **Two category pages are empty** — electrical and hvac. §5 asks for all eight, so all
+  eight ship. They'll fill from the §10 after-launch list.
 
 ---
 
 ## Links
 
 - **Review (PR):** https://github.com/MohammedHive/inspector-calculators/pull/1
-- **Poori detail:** `docs/TASK-1-STATUS.md`
+- **Full detail:** `docs/TASK-1-STATUS.md`
 - **Design:** `docs/design-brief.md`
