@@ -1,0 +1,643 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --surface: #f6f7f9;
+  --border: #e2e5ea;
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --surface: #141414;
+    --border: #2a2a2a;
+    --accent: #5b8def;
+    --accent-foreground: #0a0a0a;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.calculator-widget {
+  display: grid;
+  gap: 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .calculator-widget {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.calculator-inputs {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.calculator-input {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.calculator-input-label {
+  font-weight: 500;
+}
+
+.calculator-input input {
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.calculator-input-help {
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.calculator-results {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.calculator-result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.calculator-result-label {
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.calculator-result-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.calculator-result-unit {
+  font-size: 1rem;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+table.sources-table,
+table.assumptions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+table.sources-table th,
+table.sources-table td,
+table.assumptions-table th,
+table.assumptions-table td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* ============================================================
+   Homepage — modelled on omnicalculator.com's index
+   (TASK-1 §0 names it as a reference; layout only, our own data)
+   ============================================================ */
+
+.home-hero {
+  background:
+    radial-gradient(60rem 22rem at 18% 12%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 62%),
+    radial-gradient(48rem 20rem at 82% 4%, color-mix(in srgb, #e879a8 14%, transparent), transparent 60%),
+    radial-gradient(52rem 24rem at 62% 92%, color-mix(in srgb, #f2c94c 13%, transparent), transparent 62%),
+    var(--background);
+  border-bottom: 1px solid transparent;
+}
+
+.home-hero-inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 3.5rem 1rem 4.5rem;
+  display: grid;
+  gap: 1.75rem;
+  align-items: center;
+}
+
+@media (min-width: 860px) {
+  .home-hero-inner {
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+.home-hero-title {
+  font-size: clamp(1.7rem, 4.2vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.home-hero-count {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.home-hero-search input[type='search'] {
+  width: 100%;
+  max-width: none;
+  font-size: 1rem;
+  padding: 0.95rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -12px rgb(0 0 0 / 0.18);
+}
+
+.home-hero-search input[type='search']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* White panel that lifts over the hero wash, as on the reference */
+.home-panel {
+  max-width: 64rem;
+  margin: -2.5rem auto 0;
+  padding: 1.75rem 1.25rem 2rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  position: relative;
+}
+
+.home-positioning {
+  margin: 0 0 1.5rem;
+  font-size: 1.0625rem;
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.75rem;
+}
+
+.cat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+  padding: 1.25rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.cat-tile:hover {
+  border-color: var(--accent);
+  background: var(--background);
+}
+
+.cat-tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cat-tile-icon {
+  color: var(--accent);
+  display: inline-flex;
+}
+
+.cat-tile-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.cat-tile-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+/* ---- calculator card grid ---- */
+
+.home-section {
+  max-width: 64rem;
+  margin: 3.5rem auto 0;
+  padding: 0 1.25rem;
+}
+
+.home-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  text-align: center;
+  margin: 0 0 1.75rem;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1rem;
+}
+
+.calc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--background);
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.calc-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 28px -18px rgb(0 0 0 / 0.35);
+}
+
+.calc-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.calc-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.calc-card-title {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.calc-card-arrow {
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.calc-card:hover .calc-card-arrow {
+  transform: translateX(2px);
+}
+
+.calc-card-desc {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+  flex: 1;
+}
+
+.calc-card-cat {
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--foreground) 50%, transparent);
+}
+
+/* Hide the category tiles while the search box is filtering */
+body[data-searching='true'] .hide-on-search {
+  display: none;
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.site-footer {
+  margin-top: 4rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.site-footer-inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem;
+  display: grid;
+  gap: 2.25rem;
+}
+
+@media (min-width: 860px) {
+  .site-footer-inner {
+    grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+    gap: 3rem;
+  }
+}
+
+.site-footer-tagline {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.site-footer-name {
+  margin: 0.4rem 0 0;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.site-footer-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.site-footer-cols {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.site-footer-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin: 0 0 0.9rem;
+}
+
+.site-footer-cats,
+.site-footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.site-footer-cats li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.site-footer-cat-icon {
+  color: var(--accent);
+  display: inline-flex;
+}
+
+.site-footer-cat-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.site-footer-pending {
+  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+}
+
+.site-footer-bar {
+  border-top: 1px solid var(--border);
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.site-footer-bar > * {
+  display: block;
+}
+
+@media (min-width: 640px) {
+  .site-footer-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+.site-footer-bar {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 1.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-tile,
+  .calc-card,
+  .calc-card-arrow {
+    transition: none;
+  }
+}
+
+/* ---- methodology pattern (electricaltoolbox.com) ---- */
+
+.home-eyebrow {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.trust-strip {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.trust-strip-inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.trust-item {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.trust-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+.trust-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.trust-text {
+  margin: 0.2rem 0 0;
+  font-size: 0.825rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+/* The home panel now sits below the trust strip, so drop the overlap */
+.home-panel {
+  margin-top: 2rem;
+}
+
+/* ---- dense categorized index (calculator.net IA) ---- */
+
+.index-grid {
+  display: grid;
+  gap: 2.25rem 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  align-items: start;
+}
+
+.index-col-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.index-col-head a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.index-col-head a:hover {
+  color: var(--accent);
+}
+
+.index-col-icon {
+  color: var(--accent);
+  display: inline-flex;
+}
+
+.index-col-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Hairline that runs out from the heading, as on the reference */
+.index-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.index-col-blurb {
+  margin: 0 0 0.9rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+}
+
+.index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.index-link {
+  display: block;
+  font-weight: 600;
+  font-size: 0.925rem;
+  line-height: 1.35;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.index-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.index-desc {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.home-section-title {
+  text-align: left;
+}
+
+/* ---- narrow screens: stack the result label above its value ----
+   At 360–400px a long label plus a 7-digit mono figure plus its unit cannot
+   share a row without the unit wrapping away from the number. Stacking keeps
+   the figure and its unit together, which is the part that has to stay
+   readable (TASK-1 §7: result numbers large and mono, inputs stacked on
+   mobile). Reverts to a single row as soon as there is width for it. */
+@media (max-width: 30rem) {
+  .calculator-result {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+    align-items: start;
+  }
+
+  .calculator-result-value {
+    font-size: 1.375rem;
+    white-space: nowrap;
+  }
+
+  .calculator-result-unit {
+    white-space: nowrap;
+  }
+}

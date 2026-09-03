@@ -1,0 +1,29 @@
+{
+  "name": "inspector-calculators",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "npm run check:content && next build",
+    "start": "next start",
+    "check:content": "tsx scripts/check-content.mjs",
+    "check:ssr": "node scripts/check-ssr.mjs",
+    "check:sources": "tsx scripts/check-sources.mjs"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.13",
+    "typescript": "^5"
+  }
+}
