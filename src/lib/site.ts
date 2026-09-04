@@ -8,13 +8,24 @@
  * site — five of them fighting the canonical entity. Do not repeat it.
  *
  * SITE_URL is an env var because the domain is not registered yet. Set
- * NEXT_PUBLIC_SITE_URL before any production build; the fallback is dev-only
+ * NEXT_PUBLIC_SITE_URL before any production build; the fallback is dev-only.
+ * NEXT_PUBLIC_ vars are inlined at BUILD time, so a deploy built without it
+ * ships localhost URLs that no run-time setting can fix — that bug shipped
+ * here once already. The guard below makes it impossible to repeat
  * and will produce wrong canonicals if it ever reaches production.
  */
 
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-).replace(/\/$/, '');
+const RAW_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+
+if (!RAW_SITE_URL && (process.env.VERCEL || process.env.CI)) {
+  throw new Error(
+    'NEXT_PUBLIC_SITE_URL is not set. Building without it bakes ' +
+      'http://localhost:3000 into robots.txt, sitemap.xml, every canonical ' +
+      'and every JSON-LD @id. Set it on the deploy project before building.',
+  );
+}
+
+export const SITE_URL = (RAW_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 
 export const SITE_NAME = 'Inspector Calculators';
 export const SITE_TAGLINE = 'Free calculators for professional home inspectors. Every formula shows its source.';
