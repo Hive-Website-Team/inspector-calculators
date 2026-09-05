@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Poppins } from 'next/font/google';
 import { calculators } from '@/calculators';
 import { CATEGORY_LABELS, categoryLabel } from '@/lib/categories';
 import { categoryIcon } from '@/lib/category-icons';
@@ -10,10 +11,21 @@ const activeCategories = Object.keys(CATEGORY_LABELS).filter((c) =>
   calculators.some((m) => m.record.category === c),
 );
 
-// A system font stack, not next/font/google: it renders instantly with zero
-// network dependency at build or request time, which matters more for a
-// tool site than a custom webfont does. See src/app/globals.css for the
-// --font-sans / --font-mono stacks.
+/*
+  Poppins, via next/font.
+  This replaces an earlier deliberate choice of a pure system stack. The reason
+  that choice was made — no network dependency at request time — still holds:
+  next/font downloads the face at BUILD time and serves it from our own origin
+  with a preload hint, so there is no third-party request when a page loads.
+  What changes is that the geometric sans is the loudest single signal in the
+  Omni reference, and a system stack cannot carry it.
+*/
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-poppins',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,19 +35,23 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`h-full antialiased ${poppins.variable}`}>
       <head>
         {/* Plain <script>, not next/script — must be present in server-rendered HTML for
             crawlers that do not run JavaScript. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(rootJsonLd()) }} />
       </head>
       <body className="min-h-full flex flex-col">
-        <header className="border-b border-[var(--border)]">
-          <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between gap-4">
-            <a href="/" className="font-semibold">
+        {/* Omni centres its wordmark and keeps the bar white. The Log in /
+            Sign up pair on the right is deliberately not reproduced — this site
+            has no accounts, and the hero promises "no signup". */}
+        <header className="site-header">
+          <div className="site-header-inner">
+            <span />
+            <a href="/" className="site-wordmark">
               {SITE_NAME}
             </a>
-            <nav className="text-sm flex gap-4">
+            <nav className="site-header-nav">
               <a href="/methodology">Methodology</a>
               <a href="/about">About</a>
             </nav>
@@ -43,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         </header>
         <main className="flex-1">{children}</main>
         <footer className="site-footer">
+          <span className="om-arc om-arc-3" aria-hidden="true" />
           <div className="site-footer-inner">
             <div className="site-footer-brand">
               <p className="site-footer-tagline">Every formula shows its source.</p>

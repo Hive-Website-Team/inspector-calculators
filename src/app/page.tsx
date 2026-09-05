@@ -1,5 +1,5 @@
 import { calculators } from '@/calculators';
-import { CATEGORY_LABELS, categoryBlurb, categoryLabel } from '@/lib/categories';
+import { CATEGORY_LABELS, categoryLabel } from '@/lib/categories';
 import { categoryIcon } from '@/lib/category-icons';
 import { CalculatorSearch } from '@/components/calculator-search';
 
@@ -31,6 +31,11 @@ export default function HomePage() {
   return (
     <>
       <div className="home-hero">
+        {/* Omni's arc segments. Pure decoration — two rings cropped by the
+            section edges, coloured blue/red/yellow. aria-hidden because they
+            carry no information. */}
+        <span className="om-arc om-arc-1" aria-hidden="true" />
+        <span className="om-arc om-arc-2" aria-hidden="true" />
         <div className="home-hero-inner">
           <div>
             {/* Standards eyebrow — the electricaltoolbox.com pattern: state the
@@ -123,26 +128,38 @@ export default function HomePage() {
           reader and the list. */}
       <section className="home-section">
         <h2 className="home-section-title">All calculators</h2>
-        <div className="index-grid">
-          {activeCategories.map((category) => (
-            <div key={category} className="index-col">
-              <h3 className="index-col-head">
-                <span className="index-col-icon">{categoryIcon(category)}</span>
-                <a href={`/category/${category}`}>{categoryLabel(category)}</a>
-                <span className="index-rule" aria-hidden="true" />
-              </h3>
-              <p className="index-col-blurb">{categoryBlurb(category)}</p>
-              <ul className="index-list">
-                {byCategory.get(category)!.map(({ record }) => (
-                  <li key={record.slug} data-calculator-slug={record.slug}>
-                    <a href={`/${record.slug}`} className="index-link">
-                      {record.title}
-                    </a>
-                    <span className="index-desc">{blurb(record.definition)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        {/* Card grid, as in the Omni reference: title with a trailing arrow, a
+            short description, and the category as a quiet label at the foot.
+            The per-category grouping the previous list carried now lives in the
+            tiles above and on each /category page, so nothing was lost. */}
+        <div className="calc-grid">
+          {calculators.map(({ record }) => (
+            <a
+              key={record.slug}
+              href={`/${record.slug}`}
+              className="calc-card"
+              data-calculator-slug={record.slug}
+            >
+              <span className="calc-card-head">
+                <span className="calc-card-title">{record.title}</span>
+                <svg
+                  className="calc-card-arrow"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </span>
+              <span className="calc-card-desc">{blurb(record.definition)}</span>
+              <span className="calc-card-cat">{categoryLabel(record.category)}</span>
+            </a>
           ))}
         </div>
       </section>
