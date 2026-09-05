@@ -1,7 +1,7 @@
 /**
  * Single source of truth for site identity and the schema.org entity graph.
  *
- * Ported from the convention proven on hiveinspect.com (`src/data/seo.ts`):
+ * Ported from a convention proven on a sibling site (`src/data/seo.ts`):
  * every structured-data node referenced anywhere on the site is declared HERE
  * with a stable `@id`, and pages reference those `@id`s rather than declaring
  * their own. Duplicate inline Organization nodes were a real P0 bug on that
@@ -31,17 +31,6 @@ export const SITE_NAME = 'Inspector Calculators';
 export const SITE_TAGLINE = 'Free calculators for professional home inspectors. Every formula shows its source.';
 
 /**
- * The publisher is disclosed, not hidden. The site's credibility depends on a
- * reader being able to see who funds it and judge for themselves — concealing
- * it is what would actually damage the neutrality claim.
- */
-export const PUBLISHER = {
-  name: 'Hive Inspect',
-  legalName: 'Synapse Mobility, Inc.',
-  url: 'https://www.hiveinspect.com',
-} as const;
-
-/**
  * Content freshness. A literal date, deliberately NOT `new Date()`.
  * Crawlers discount an always-now lastmod, and every page claiming to have
  * changed on every build is a negative signal. Bump this when content changes.
@@ -51,7 +40,6 @@ export const CONTENT_LAST_REVIEWED = new Date('2026-09-03');
 export const ids = {
   organization: `${SITE_URL}/#organization`,
   website: `${SITE_URL}/#website`,
-  publisher: `${PUBLISHER.url}/#organization`,
 } as const;
 
 export function organizationSchema() {
@@ -61,13 +49,6 @@ export function organizationSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     description: SITE_TAGLINE,
-    parentOrganization: {
-      '@type': 'Organization',
-      '@id': ids.publisher,
-      name: PUBLISHER.name,
-      legalName: PUBLISHER.legalName,
-      url: PUBLISHER.url,
-    },
   };
 }
 

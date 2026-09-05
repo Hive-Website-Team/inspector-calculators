@@ -8,10 +8,8 @@ export default function AboutPage() {
       <h1 className="text-2xl font-semibold">About Inspector Calculators</h1>
 
       <p className="mt-6 leading-relaxed">
-        Inspector Calculators is published by Hive Inspect (Synapse Mobility, Inc.), a company that builds
-        software for professional home inspectors. This site is not Hive marketing — it is a free, focused
-        set of business and code-referenced calculators built for the industry, independent of what software
-        an inspector uses.
+        Inspector Calculators is a free, focused set of business and code-referenced calculators
+        built for professional home inspectors — independent of what software an inspector uses.
       </p>
 
       <p className="mt-4 leading-relaxed">
@@ -21,13 +19,6 @@ export default function AboutPage() {
         that gate works.
       </p>
 
-      <p className="mt-4 leading-relaxed">
-        Hive Inspect's own product is at{' '}
-        <a href="https://www.hiveinspect.com" rel="noopener noreferrer">
-          hiveinspect.com
-        </a>
-        . That is the only link to it anywhere on this site.
-      </p>
     </div>
   );
 }

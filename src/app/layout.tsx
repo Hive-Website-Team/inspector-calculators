@@ -48,9 +48,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
               <p className="site-footer-tagline">Every formula shows its source.</p>
               <p className="site-footer-name">{SITE_NAME}</p>
               <p className="site-footer-note">
-                Published by Hive Inspect (Synapse Mobility, Inc.). Disclosed on the{' '}
-                <a href="/about">About page</a>, which carries the only link to that product
-                anywhere on this site.
+                Every formula states the source it comes from and the date it was last
+                checked. A calculator that cannot be sourced does not ship — see the{' '}
+                <a href="/methodology">methodology</a>.
               </p>
             </div>
 
@@ -79,7 +79,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           </div>
 
           <div className="site-footer-bar">
-            <span>© {CONTENT_LAST_REVIEWED.getUTCFullYear()} Synapse Mobility, Inc.</span>
+            <span>© {CONTENT_LAST_REVIEWED.getUTCFullYear()} {SITE_NAME}</span>
           </div>
         </footer>
       </body>

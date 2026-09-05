@@ -4,14 +4,14 @@ import { SITE_URL } from '@/lib/site';
 /**
  * Explicit allow groups for every AI crawler we know of.
  *
- * Ported wholesale from hiveinspect.com/src/app/robots.ts. The entire premise
+ * Ported wholesale from a sibling site's robots.ts. The entire premise
  * of this site is being readable by answer engines, so this file is load-bearing.
  *
  * WARNING: if this domain is put behind Cloudflare, its Managed robots.txt /
  * Content Signals feature PREPENDS its own `Disallow: /` block for AI bots
  * ABOVE whatever this file emits, and stamps `Content-Signal: ai-train=no`.
  * Crawlers that stop at the first matching group then resolve to deny. This
- * silently cost hiveinspect.com months (see ~/websites/SEO_PLAN.md A1).
+ * silently cost a sibling site months (see ~/websites/SEO_PLAN.md A1).
  * Verify with: curl -A GPTBot https://<domain>/robots.txt
  */
 const AI_AGENTS = [

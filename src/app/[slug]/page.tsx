@@ -148,7 +148,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
       </ul>
 
       <p className="mt-10 text-sm text-[color-mix(in_srgb,var(--foreground)_65%,transparent)] border-t border-[var(--border)] pt-4">
-        Published by Inspector Calculators, part of the Hive Inspect network. Updated {record.dateModified}. See{' '}
+        Published by Inspector Calculators. Updated {record.dateModified}. See{' '}
         <a href="/methodology">methodology</a> for how formulas are chosen and re-verified.
       </p>
     </article>
