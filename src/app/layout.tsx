@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
+import { FooterArc } from '@/components/arcs';
 import { calculators } from '@/calculators';
 import { CATEGORY_LABELS, categoryLabel } from '@/lib/categories';
 import { categoryIcon } from '@/lib/category-icons';
@@ -59,7 +60,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         </header>
         <main className="flex-1">{children}</main>
         <footer className="site-footer">
-          <span className="om-arc om-arc-3" aria-hidden="true" />
+          <FooterArc />
           <div className="site-footer-inner">
             <div className="site-footer-brand">
               <p className="site-footer-tagline">Every formula shows its source.</p>

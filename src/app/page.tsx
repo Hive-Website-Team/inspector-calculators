@@ -2,6 +2,7 @@ import { calculators } from '@/calculators';
 import { CATEGORY_LABELS, categoryLabel } from '@/lib/categories';
 import { categoryIcon } from '@/lib/category-icons';
 import { CalculatorSearch } from '@/components/calculator-search';
+import { HeroArcs } from '@/components/arcs';
 
 export default function HomePage() {
   const byCategory = new Map<string, typeof calculators>();
@@ -31,11 +32,8 @@ export default function HomePage() {
   return (
     <>
       <div className="home-hero">
-        {/* Omni's arc segments. Pure decoration — two rings cropped by the
-            section edges, coloured blue/red/yellow. aria-hidden because they
-            carry no information. */}
-        <span className="om-arc om-arc-1" aria-hidden="true" />
-        <span className="om-arc om-arc-2" aria-hidden="true" />
+        {/* Omni's broken rings, cropped by the section edges. Decoration only. */}
+        <HeroArcs />
         <div className="home-hero-inner">
           <div>
             {/* Standards eyebrow — the electricaltoolbox.com pattern: state the
@@ -51,7 +49,45 @@ export default function HomePage() {
           </div>
           <div className="home-hero-search">
             <CalculatorSearch calculators={searchableList} />
+            {/* The magnifier the reference puts inside the pill. Decorative —
+                the input is already labelled, and this is not a button. */}
+            <svg
+              className="home-search-icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.6-3.6" />
+            </svg>
           </div>
+        </div>
+      </div>
+
+
+      <div className="home-panel">
+        <p className="home-positioning">
+          Free calculators for professional home inspectors. Every formula shows its source.
+        </p>
+
+        <div className="cat-grid hide-on-search">
+          {activeCategories.map((category) => {
+            const count = byCategory.get(category)!.length;
+            return (
+              <a key={category} href={`/category/${category}`} className="cat-tile">
+                <span className="cat-tile-icon">{categoryIcon(category)}</span>
+                <span className="cat-tile-name">{categoryLabel(category)}</span>
+                <span className="cat-tile-count">
+                  {count} calculator{count === 1 ? '' : 's'}
+                </span>
+              </a>
+            );
+          })}
         </div>
       </div>
 
@@ -98,27 +134,6 @@ export default function HomePage() {
               <p className="trust-text">Works on a phone in a crawlspace. No signup, no paywall, no popups.</p>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="home-panel">
-        <p className="home-positioning">
-          Free calculators for professional home inspectors. Every formula shows its source.
-        </p>
-
-        <div className="cat-grid hide-on-search">
-          {activeCategories.map((category) => {
-            const count = byCategory.get(category)!.length;
-            return (
-              <a key={category} href={`/category/${category}`} className="cat-tile">
-                <span className="cat-tile-icon">{categoryIcon(category)}</span>
-                <span className="cat-tile-name">{categoryLabel(category)}</span>
-                <span className="cat-tile-count">
-                  {count} calculator{count === 1 ? '' : 's'}
-                </span>
-              </a>
-            );
-          })}
         </div>
       </div>
 
