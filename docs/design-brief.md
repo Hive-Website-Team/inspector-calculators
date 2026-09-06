@@ -137,7 +137,30 @@ Every colour is a CSS variable, so a palette change is an edit to five lines, no
 
 ## 5. Open items
 
-1. **Type pair** — system stack (recommended) or Inter + JetBrains Mono?
-2. **Backfill `commonMistakes` and `faqs`** — currently populated on 2 of 11 calculators (attic ventilation, software pricing) as the pattern. The other 9 render without those sections. Backfilling is roughly half a day and each entry needs the same sourcing discipline as the rest of the page.
-3. **Compliance status badge** — ElectricalToolbox prints a pass/fail badge on the result for code checks. Our stair, guard and deck calculators compute the comparison already but render it as plain numbers. Worth adding; needs a schema field, so it needs sign-off.
-4. **Named reviewer** — blocked on `THREE_SITES_BRIEF.md` §6.
+**Superseded 2026-09-07.** The owner supplied screenshots of the pages this site should
+look like and instructed that they be followed exactly, ignoring the design direction in
+`TASK-1` §7. The UI was rebuilt against them — home, `/category/<name>` and `/<slug>`.
+What follows is the state of the items this brief used to leave open.
+
+1. ~~**Type pair** — system stack or Inter + JetBrains Mono?~~ **Closed.** Neither. The
+   site ships Poppins via `next/font`, which downloads at build time and is served from
+   our own origin, so there is no third-party request at page load. It is the loudest
+   single signal in the supplied reference and a system stack cannot carry it.
+
+2. ~~**Backfill `commonMistakes` and `faqs`** — currently populated on 2 of 11
+   calculators.~~ **Withdrawn — this was never true.** Neither field exists in
+   `calculator-schema.ts` nor in any record; nothing renders them. `TASK-1` §11 also
+   forbids FAQ content and accordions outright, so the FAQ half should not be built at
+   all. If a "common mistakes" section is still wanted it is a fresh schema field plus
+   eleven pieces of sourced prose, not a backfill.
+
+3. **Compliance status badge** — still open. ElectricalToolbox prints a pass/fail badge on
+   the result for code checks. The stair, guard and deck calculators already compute the
+   comparison and render it as plain numbers ("Riser over the limit by: 0 in"). Turning
+   that into a badge needs a schema field, so it needs sign-off.
+
+4. **Named reviewer** — still blocked on `THREE_SITES_BRIEF.md` §6.
+
+5. **Light theme only** — new. `TASK-1` §7 asks for dark mode via `prefers-color-scheme`;
+   the owner asked for white only, so the dark branch was removed rather than left dead
+   in the stylesheet. Reinstating it means redefining every token in a second block.

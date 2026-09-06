@@ -26,8 +26,14 @@ export const record: CalculatorRecord = {
     { key: 'lowestPerInspection', label: 'Software cost per inspection at that price', unit: '$' },
     { key: 'breakEvenInspectionsPerMonth', label: 'Volume where per-inspection overtakes the flat plan', unit: 'inspections/mo' },
   ],
+  summary:
+    'Compare flat-subscription, per-inspection and per-seat inspection software pricing at your real monthly volume.',
+
   formulaText:
     'Flat model = (base price + additional-seat price × (inspectors − 1)) × 12. Per-inspection model = the tiered rate applied to each band of monthly volume, × 12. Seat model = price per user × inspectors × 12. Break-even is the lowest monthly volume at which the tiered per-inspection bill equals or exceeds the flat plan.',
+
+  interpretation:
+    'Read the break-even volume before the cheapest-model result. Below it per-inspection billing wins, above it the flat plan does — and if your volume swings across that line seasonally, the model that looks cheapest on an average month is not the one that costs least over a year. This compares pricing models, not products: a cheaper model with a feature set you cannot work in is not a saving.',
   assumptions: [
     {
       text: 'Flat-subscription defaults are Spectora\'s published prices: $109 per month for the base plan, $1,090 prepaid annually, and $99 per month for each additional inspector.',

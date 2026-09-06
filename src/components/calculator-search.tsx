@@ -18,6 +18,13 @@ export interface SearchableCalculator {
 export function CalculatorSearch({ calculators }: { calculators: SearchableCalculator[] }) {
   const [query, setQuery] = useState('');
 
+  // The inner-page header search is a plain GET form pointing at "/?q=…", so a
+  // search started from any other page lands here with the term already set.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) setQuery(q);
+  }, []);
+
   useEffect(() => {
     const q = query.trim().toLowerCase();
     const matches = q

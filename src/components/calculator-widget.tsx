@@ -24,12 +24,17 @@ export function CalculatorWidget({ slug }: { slug: string }) {
 
   const [inputs, setInputs] = useState<Record<string, number>>(defaultInputs);
   const [hydratedFromUrl, setHydratedFromUrl] = useState(false);
+  /* Gates the first querystring write — see the sync effect below. */
+  const [readDone, setReadDone] = useState(false);
 
   // Read a shared result URL's querystring once, on mount, client-side only.
   useEffect(() => {
     if (typeof window === 'undefined' || !mod) return;
     const params = new URLSearchParams(window.location.search);
-    if ([...params.keys()].length === 0) return;
+    if ([...params.keys()].length === 0) {
+      setReadDone(true);
+      return;
+    }
     setInputs((prev) => {
       const next = { ...prev };
       for (const input of mod.record.inputs) {
@@ -39,17 +44,27 @@ export function CalculatorWidget({ slug }: { slug: string }) {
       return next;
     });
     setHydratedFromUrl(true);
+    setReadDone(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep the querystring in sync so a result can be shared as a link.
+  /*
+    Keep the querystring in sync so a result can be shared as a link.
+
+    `readDone` gates the first write. Without it this effect fires on mount with
+    `inputs` still holding the record's defaults — before the read effect's
+    setInputs has committed — and overwrites an incoming shared link's
+    querystring with the defaults. React StrictMode then re-runs the read effect
+    against that already-overwritten URL, so in `next dev` the shared values are
+    lost outright.
+  */
   useEffect(() => {
-    if (typeof window === 'undefined' || !mod) return;
+    if (typeof window === 'undefined' || !mod || !readDone) return;
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(inputs)) params.set(key, String(value));
     const next = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, '', next);
-  }, [inputs, mod]);
+  }, [inputs, mod, readDone]);
 
   if (!mod) return null;
   const { record, compute } = mod;

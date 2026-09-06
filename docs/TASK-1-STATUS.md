@@ -24,7 +24,7 @@ page renders from the record; prose is secondary.
 | # | Calculator | Category | Sourced to |
 |---|---|---|---|
 | 1 | Inspection Business Profitability | Business | IRS standard mileage rate |
-| 2 | Revenue Goal → Inspections Needed | Business | *(see open decision 4)* |
+| 2 | Revenue Goal → Inspections Needed | Business | Derived — stated derivation, no external citation |
 | 3 | Startup Cost Planner | Business | Spectora published pricing |
 | 4 | Cost Per Inspection | Pricing | Spectora published pricing |
 | 5 | Software Total Cost of Ownership | Pricing | Spectora published pricing |
@@ -34,8 +34,10 @@ page renders from the record; prose is secondary.
 | 9 | Stair Rise/Run Compliance | Safety | IRC 2021 R311.7.5 |
 | 10 | Deck Joist Span | Structure | AWC DCA 6-15 Table 2 |
 | 11 | Guard & Handrail Height | Safety | IRC 2021 R312.1.2, R311.7.8 |
+| 12 | Water Heater Sizing (First-Hour Rating) | Plumbing | 10 CFR 430 Subpart B App. E, Tables I and III.1–III.4 |
 
-`TASK-1` §6 sets the bar at *"11 total, ship at 10."* Eleven ship.
+`TASK-1` §6 sets the bar at *"11 total, ship at 10."* Twelve ship — the eleven from the
+launch list plus Home Inspection Software Pricing, with §6 #10 restored (see section 4).
 
 ### Pages
 
@@ -56,17 +58,27 @@ root-level page per calculator (`/attic-ventilation-calculator`, not `/tools/...
 
 ### Design
 
-Built against the three references named in `TASK-1` §0, each for what the task says to
-take from it:
+**Rebuilt 2026-09-07 against screenshots the owner supplied, which supersede the design
+direction in `TASK-1` §7.** The owner's instruction was to follow those screenshots exactly
+and ignore the task file's design guidance. Three page types were matched:
 
-| Reference | Taken |
+| Page | Taken from the supplied reference |
 |---|---|
-| omnicalculator.com | Page craft — gradient hero, count headline, pill search, category tiles |
-| calculator.net | Information architecture — flat root URLs, dense categorized index, no decoration |
-| electricaltoolbox.com | Methodology pattern — code-edition eyebrow, trust strip, sources stated as page furniture |
+| Home | Soft multi-colour hero wash, count headline in the accent blue, pill search, broken blue/red/yellow rings cropped by the section edges, white category-tile panel lifted over the wash, card grid, tagline footer |
+| `/category/<name>` | Wordmark-left header with a search pill and a category tab row, blue icon badge beside the H1, calculator count, intro paragraph, two-column list |
+| `/<slug>` | "Last updated" line above the H1, table of contents, prose column with the tool in a sticky right rail, "Check out N similar" card |
 
-One accent colour, one type pair, dark mode via `prefers-color-scheme`.
-Full write-up and open questions in `docs/design-brief.md`.
+Deviations from the task file, all on the owner's instruction:
+
+- **Light theme only.** `TASK-1` §7 asks for dark mode via `prefers-color-scheme`; the
+  owner asked for white only, so the dark branch was removed rather than left dead.
+- **Typeface is Poppins**, via `next/font` (downloaded at build time, served from our own
+  origin — no third-party request at page load). This settles `docs/design-brief.md`
+  open item 1, which offered a system stack or Inter + JetBrains Mono. Neither was chosen.
+
+Kept from the task file because they are content rules, not design: flat root-level URLs,
+a categorized index on `/` with a heading and a one-line description per calculator (§5),
+and the methodology pattern — formula, assumptions table, code edition, sources.
 
 ---
 
@@ -74,14 +86,24 @@ Full write-up and open questions in `docs/design-brief.md`.
 
 All run against a production build.
 
+Re-run 2026-09-07 after the design rebuild.
+
 ```
 Content check passed — 11 calculators, every one carries a sourced assumption
 SSR check passed     — 23 URLs, all resolve with server-rendered schema
 Source check passed  — 10 of 10 source URLs return 200
-Lighthouse mobile    — Performance 96 · Accessibility 96 · Best Practices 100 · SEO 100
-JS disabled          — 11/11 calculators show a complete computed result (44 values)
-Mobile 360 & 390px   — 16/16 pages, no horizontal scroll, no overflowing elements
+Lighthouse mobile    — Accessibility 100 · Best Practices 100 · SEO 100 on every page type;
+                       Performance 92-97 across runs
+JS disabled          — 11/11 calculators show every computed result (49 values)
+Shareable URLs       — 11/11 restore their inputs and keep the querystring
+TOC anchors          — 11/11 pages: every anchor resolves to an h2 on the page
+Mobile               — 60 page-loads at 320/360/390/768/1024px, no horizontal scroll
 ```
+
+Three defects were found and fixed during that re-run, all introduced by the rebuild:
+the header CTA rendered dark-on-blue at 3.11:1 because `.site-header-nav a` outranked it
+on specificity; the inner-page header overflowed the viewport at 360px and 390px; and on
+a phone the calculator sat below the entire article instead of directly under the H1.
 
 **Build gate proven both ways.** Removing the source from one assumption:
 
@@ -117,26 +139,61 @@ HowTo schema          0
 Accordions / <details> 0
 images.unoptimized    absent
 new Date() in sitemap absent
-Hive links            1 (on /about only), 0 everywhere else
+Hive links            0 sitewide  <-- deliberate, owner-confirmed 2026-09-07; supersedes §9
 Bare "Disallow: /"    0 under GPTBot, ClaudeBot, OAI-SearchBot
 ```
 
+### Known deviations from the task file
+
+1. **No Hive Inspect / Synapse Mobility disclosure anywhere on the site — settled.**
+   `TASK-1` §5 says `/about` names the publisher and §9 requires exactly one
+   hiveinspect.com link there. Commit `7511505` removed it across all three sites on the
+   owner's instruction. **Re-confirmed by the owner 2026-09-07: "websites should not
+   mention Hive Inspect / Synapse owns it."** The task file is superseded on this point.
+   §5 and §9 should be amended rather than the site changed; the checklist box stays
+   unticked deliberately.
+
+   The consequence was handled 2026-09-07 without naming Hive: `/about` now explains
+   why the site exists, how code figures and vendor prices are verified, and how
+   corrections are handled, and the site carries a corrections address
+   (`corrections@inspectorcalculators.com`) on `/about`, `/methodology`, the footer and
+   in the Organization schema's `contactPoint`. **The mailbox still needs creating.**
+
+2. **Light theme only** — see the Design section above.
+
 ---
 
-## 4. One calculator was removed
+## 4. The withdrawn calculator is back
 
-**Water Heater Sizing (First-Hour Rating)** — deleted, not shipped.
+**Water Heater Sizing (First-Hour Rating)** — withdrawn 2026-09-04, restored 2026-09-07.
 
-Its only source was a Department of Energy sizing page. That page is gone, and so is the
-entire `energy.gov/energysaver` section with it. Five candidate replacement URLs were
-checked; all returned 404. A DOE Building America PDF that is still live turned out not to
-contain the per-use gallon worksheet.
+It was withdrawn because its only source, the Department of Energy's "Sizing a New Water
+Heater" page, was taken offline along with the rest of `energy.gov/energysaver`. That is
+still true: both `energy.gov/energysaver/sizing-new-water-heater` and `energy.gov/node/1266126`
+return 404, and the per-fixture gallon figures circulating on plumbing-contractor blogs are
+secondary restatements of that dead page, which `tasks/README.md` §2.2 forbids citing.
 
-`tasks/README.md` §2.1 is unambiguous: *"If you cannot find a primary source for a claim,
-delete the claim."* Removed and logged in `/changelog` with the reason.
+What unblocked it was `README.md` §2.1's own instruction: *"Some government sites
+(`cpsc.gov`) block `curl` — check those in a real browser."* eCFR is one of those sites.
+An automated request is redirected to an unblock page; a real browser gets the text. Opened
+in a browser on 2026-09-07, **10 CFR 430 Subpart B Appendix E** — the federal test procedure
+itself, not anyone's summary of it — carries the figures directly:
 
-This is why the source check exists now — a citation that returns 404 is an unsourced
-claim, and nothing in the build was catching it.
+- **Table I** assigns the draw pattern from the first-hour rating: under 18 gal very-small,
+  18 to under 51 low, 51 to under 75 medium, 75 and above high.
+- **Tables III.1–III.4** list every draw in each pattern. Daily totals were summed from the
+  rendered table rather than transcribed by eye: 10.0 gal over 9 draws, 38.0 over 11,
+  55.0 over 12, 84.0 over 14.
+
+The source URL returns 200 to `curl` as well, so `check:sources` covers it.
+
+**What was deliberately not restored:** the fixture-by-fixture peak-hour worksheet
+("shower = 20 gallons"). Those figures existed only on the dead DOE page and no live primary
+source carries them, so peak-hour demand is an input the user supplies rather than a number
+this site asserts. The limitation says so on the page.
+
+This also fills the `plumbing` category, which had been dropped from the nav and sitemap
+while empty. `electrical` and `hvac` remain empty and remain dropped.
 
 ---
 
@@ -153,11 +210,19 @@ claim, and nothing in the build was catching it.
 2. **Vercel.** Create the project, add me to the team, and run `vercel --prod` yourself.
 
 3. **Design brief sign-off** — `docs/design-brief.md`.
-   One open question in it: keep the system font stack (my recommendation — zero network
-   cost, and Lighthouse ≥ 90 is a launch requirement) or switch to the Inter + JetBrains
-   Mono pair the task file suggests. Two lines of CSS either way.
+   `TASK-1` §7 says get this approved *before* writing UI code. That did not happen, and
+   the UI has since been rebuilt against owner-supplied screenshots instead. The brief is
+   now a record of what was built, not a proposal. The font question in it is closed:
+   Poppins ships.
 
-4. **The Revenue Goal citation.**
+4. ~~**The Revenue Goal citation.**~~ **Closed 2026-09-07.**
+   Resolved without a ruling: the schema gained a `derivation` source type, so a
+   pure-arithmetic calculator satisfies the gate by writing out its reasoning instead of
+   borrowing a secondary authority. The Investopedia citation is gone. Both the content
+   gate and the source checker understand the new type, and the gate was re-proven to
+   still refuse a record carrying neither a citation nor a derivation. Original note:
+
+   **The Revenue Goal citation.**
    It currently cites Investopedia. The URL is live, but Investopedia is a *secondary*
    source, which README §2.2 forbids, and `TASK-1` §6 says that calculator should cite
    *"none external — pure arithmetic."* Removing it makes the record fail the gate's

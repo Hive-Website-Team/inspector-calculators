@@ -19,10 +19,22 @@ export const record: CalculatorRecord = {
     { key: 'requiredHourlyYield', label: 'Required hourly yield', unit: '$/hr' },
     { key: 'capacityGap', label: 'Capacity gap (needed vs. available jobs/week)' },
   ],
+  summary:
+    'Turn a target annual income into the number of inspections and the weekly pace a solo inspector needs to hit it.',
+
   formulaText: 'Jobs/year = target income ÷ average ticket. Jobs/week = jobs/year ÷ weeks worked/year. Required hourly yield = average ticket ÷ hours per job. Capacity gap = jobs/week needed − maximum jobs/week at the stated working days and hours per workday.',
+
+  interpretation:
+    'The capacity gap is the number that matters. A positive gap means the goal fits inside the schedule you described; a negative gap means it does not, and no amount of effort closes it — you have to raise the ticket, add add-on services, or add an inspector. Treat jobs per week as a booking target and check it against your actual booked weeks rather than your best one.',
   assumptions: [
-    { text: 'The hourly-yield framing follows the standard small-business definition of effective hourly rate: revenue divided by the hours worked to produce it.',
-      source: { citation: 'Investopedia — Break-Even Analysis', url: 'https://www.investopedia.com/terms/b/breakevenanalysis.asp', accessed: '2026-09-03' } },
+    {
+      text: 'Required hourly yield is revenue divided by the hours worked to produce it, and capacity is the jobs a stated schedule can physically hold. Both are definitional arithmetic on the numbers entered, not a figure taken from any outside authority.',
+      source: {
+        citation: 'Derived \u2014 definitional arithmetic on user-entered figures',
+        derivation:
+          'Every output is a direct division or subtraction of the inputs, with no constant, rate or table taken from elsewhere. Jobs per year is the target income divided by the average ticket. Jobs per week is that figure divided by the weeks worked. Required hourly yield is the average ticket divided by the hours each job consumes. Capacity gap subtracts the jobs per week needed from the jobs per week the stated working days and hours can hold. There is nothing here to cite because there is no external claim: change an input and the arithmetic follows it exactly.',
+      },
+    },
   ],
   limitations: [
     'Assumes every job earns the same average ticket; a real mix of property sizes will shift the actual number of jobs needed.',

@@ -29,8 +29,16 @@ const MANUAL_REVIEW = new Set([401, 402, 403, 405, 406, 429]);
 
 /** url -> the calculator slugs that cite it */
 const citedBy = new Map();
+let derivedCount = 0;
 for (const { record } of calculators) {
   for (const a of record.assumptions) {
+    // A derived source has no URL by design — it states its reasoning instead of
+    // borrowing an authority. There is nothing to probe. The content gate already
+    // refuses a source that offers neither.
+    if (a.source.derivation !== undefined) {
+      derivedCount++;
+      continue;
+    }
     const list = citedBy.get(a.source.url) ?? [];
     if (!list.includes(record.slug)) list.push(record.slug);
     citedBy.set(a.source.url, list);
@@ -38,7 +46,11 @@ for (const { record } of calculators) {
 }
 
 const urls = [...citedBy.keys()].sort();
-console.log(`\n  Checking ${urls.length} source URL(s) cited by ${calculators.length} calculator(s)...\n`);
+console.log(
+  `\n  Checking ${urls.length} source URL(s) cited by ${calculators.length} calculator(s)` +
+    (derivedCount > 0 ? `, plus ${derivedCount} derived source(s) with nothing to fetch` : '') +
+    '...\n',
+);
 
 async function probe(url) {
   const attempt = async (method) => {

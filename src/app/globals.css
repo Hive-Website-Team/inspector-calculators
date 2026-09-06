@@ -4,33 +4,29 @@
  * Design tokens — Omni Calculator.
  *
  * Reference supplied by the owner: omnicalculator.com (three screenshots,
- * 2026-09-05). TASK-1 §0 already named Omni as the model for the index layout;
- * these tokens take its surface treatment as well.
+ * 2026-09-06). The homepage is a close reproduction of that layout with this
+ * site's own data.
  *
- * What was taken:
- *   the pale lavender page wash with white cards floating on it; the count set
- *   large in blue inside the hero sentence; the dashed blue/red/yellow arc
- *   segments bleeding off the corners; a centred wordmark; generously rounded
- *   cards with a hairline border and almost no shadow; a footer that opens with
- *   a bold statement beside the wordmark.
- *
- * What was NOT taken:
- *   the Log in / Sign up pair. This site has no accounts, and the hero already
- *   promises "no signup" — putting a signup button next to that would be a lie
- *   in the furniture.
+ * Light only. The reference ships light only, and the owner asked for the white
+ * theme explicitly — so there is no prefers-color-scheme branch here. Adding one
+ * back would put the site on a surface the reference never has.
  */
 
 :root {
+  color-scheme: light;
+
   --om-blue: #2f6bff;
-  --om-red: #ea4b4b;
-  --om-yellow: #fbbf3c;
+  --om-blue-dark: #1e57ea;
+  --om-red: #f4515b;
+  --om-yellow: #fbc63c;
 
   --om-paper: #ffffff;
-  --om-wash: #f4f6fe;
-  --om-wash-2: #e9edfc;
-  --om-ink: #14162b;
-  --om-ink-soft: #676c85;
-  --om-rule: #e4e7f2;
+  --om-wash: #f7f8fe;
+  --om-wash-2: #f1f3fb;
+  --om-tile: #f8f9fc;
+  --om-ink: #11142b;
+  --om-ink-soft: #6b7189;
+  --om-rule: #e7e9f3;
 
   --background: var(--om-paper);
   --foreground: var(--om-ink);
@@ -38,31 +34,6 @@
   --border: var(--om-rule);
   --accent: var(--om-blue);
   --accent-foreground: #ffffff;
-}
-
-/*
-  Omni ships light only. This is an extension, not a copy: the wash becomes a
-  deep indigo so the arcs still read against it, cards lift to a lighter panel,
-  and the blue brightens to hold contrast. Every colour is redefined from the
-  same token set, so nothing is left defined in one theme only.
-*/
-@media (prefers-color-scheme: dark) {
-  :root {
-    --om-blue: #6b96ff;
-    --om-paper: #151827;
-    --om-wash: #0e1120;
-    --om-wash-2: #141a30;
-    --om-ink: #eceefb;
-    --om-ink-soft: #9aa0bb;
-    --om-rule: #262c44;
-
-    --background: var(--om-paper);
-    --foreground: var(--om-ink);
-    --surface: var(--om-wash);
-    --border: var(--om-rule);
-    --accent: var(--om-blue);
-    --accent-foreground: #0e1120;
-  }
 }
 
 @theme inline {
@@ -78,86 +49,118 @@
 }
 
 body {
-  background: var(--om-wash);
+  background: var(--om-paper);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-.calculator-widget {
-  display: grid;
-  gap: 1.5rem;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
+/* A long unbreakable token — an email address, a bare URL — must wrap rather
+   than push the page sideways. corrections@inspectorcalculators.com is 36
+   characters and overflowed /about and /methodology at 320px without this. */
+a[href^='mailto:'],
+a[href^='http'] {
+  overflow-wrap: anywhere;
 }
 
-@media (min-width: 768px) {
-  .calculator-widget {
-    grid-template-columns: 1fr 1fr;
-  }
+/* ============================================================
+   Calculator widget (shared by every /[slug] page)
+   ============================================================ */
+
+/*
+  The tool itself. On the reference this sits in a narrow right-hand column, so
+  it is a single stack: label, field, label, field, then the results as filled
+  read-only fields under a rule.
+*/
+.calculator-widget {
+  display: grid;
+  gap: 1.25rem;
+  border: 1px solid var(--om-rule);
+  background: var(--om-paper);
+  border-radius: 0.75rem;
+  padding: 1.35rem;
+  box-shadow: 0 1px 2px rgb(17 20 43 / 0.03);
 }
 
 .calculator-inputs {
   display: grid;
-  gap: 0.9rem;
+  gap: 1rem;
   align-content: start;
 }
 
 .calculator-input {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.4rem;
   font-size: 0.875rem;
 }
 
 .calculator-input-label {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.35;
 }
 
 .calculator-input input {
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  padding: 0.4rem 0.6rem;
-  background: var(--background);
+  width: 100%;
+  border: 1px solid var(--om-rule);
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--om-tile);
   color: var(--foreground);
   font-family: var(--font-mono);
   font-size: 1rem;
 }
 
+.calculator-input input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: var(--om-paper);
+}
+
 .calculator-input-help {
-  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+  color: var(--om-ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .calculator-results {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.85rem;
   align-content: start;
+  border-top: 1px solid var(--om-rule);
+  padding-top: 1.25rem;
 }
 
+/* Label above, then the figure in a filled field — the reference's read-only
+   result box. */
 .calculator-result {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.5rem;
+  display: grid;
+  gap: 0.35rem;
 }
 
 .calculator-result-label {
-  font-size: 0.875rem;
-  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .calculator-result-value {
+  display: block;
+  border-radius: 0.5rem;
+  background: #eef1fb;
+  padding: 0.6rem 0.85rem;
   font-family: var(--font-mono);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .calculator-result-unit {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 400;
-  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+  /* Darker than --om-ink-soft: that grey measures 4.28:1 against the filled
+     result box, which is under the 4.5:1 minimum. This is 6.0:1. */
+  color: #545a72;
 }
 
 table.sources-table,
@@ -181,94 +184,835 @@ table.assumptions-table td {
   overflow-x: auto;
 }
 
+@media (max-width: 30rem) {
+  .calculator-result-value {
+    font-size: 1.25rem;
+  }
+}
+
 /* ============================================================
-   Homepage — modelled on omnicalculator.com's index
-   (TASK-1 §0 names it as a reference; layout only, our own data)
+   Header — white bar, centred wordmark, actions on the right
    ============================================================ */
 
-/* The wash. Omni runs one pale lavender field behind the hero and the category
-   panel, with the decorative arcs bleeding off the corners. */
+.site-header {
+  background: var(--om-paper);
+  position: relative;
+  z-index: 5;
+}
+
+.site-header-inner {
+  max-width: 84rem;
+  margin: 0 auto;
+  padding: 1.1rem 1.75rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.site-wordmark {
+  justify-self: center;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 0.95rem + 0.55vw, 1.4rem);
+  letter-spacing: -0.025em;
+  color: var(--om-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-header-nav {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.925rem;
+}
+
+.site-header-nav a {
+  color: var(--om-ink);
+  text-decoration: none;
+}
+
+.site-header-nav a:hover {
+  color: var(--om-blue);
+}
+
+/* The reference closes its header with a solid blue pill. The darker blue is
+   deliberate: white on --om-blue measures 4.50:1, which Lighthouse scores as a
+   contrast failure at this size. --om-blue-dark is 5.8:1. */
+.site-header-nav a.site-header-cta {
+  background: var(--om-blue-dark);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.6rem 1.15rem;
+  border-radius: 0.5rem;
+  line-height: 1;
+}
+
+.site-header-nav a.site-header-cta:hover {
+  background: #1747c8;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .site-header-inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+  }
+  .site-header-inner > span:first-child { display: none; }
+  .site-header-nav { justify-self: center; }
+}
+
+/* ---- inner-page header: wordmark left, search centre, category tabs ---- */
+
+.site-header-inner-page {
+  border-bottom: 1px solid var(--om-rule);
+}
+
+.site-header-bar {
+  width: min(88rem, 94%);
+  margin: 0 auto;
+  padding: 0.85rem 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-wordmark-left {
+  justify-self: start;
+}
+
+.site-header-search {
+  position: relative;
+  display: block;
+}
+
+.site-header-search input[type='search'] {
+  width: 100%;
+  font-size: 0.95rem;
+  padding: 0.7rem 3rem 0.7rem 1.1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--om-rule);
+  background: var(--om-wash);
+  color: var(--om-ink);
+  appearance: none;
+}
+
+.site-header-search input[type='search']::placeholder {
+  color: var(--om-ink-soft);
+}
+
+.site-header-search input[type='search']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.site-header-search button {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--om-blue-dark);
+  cursor: pointer;
+}
+
+.site-header-search button:hover {
+  background: var(--om-wash-2);
+}
+
+/* The tab row. The current category carries a blue underline, as the
+   reference does. */
+.site-catbar {
+  width: min(88rem, 94%);
+  margin: 0 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.site-catbar::-webkit-scrollbar {
+  display: none;
+}
+
+.site-catbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 2.5rem;
+  min-width: max-content;
+}
+
+.site-catbar a {
+  display: block;
+  padding: 0.75rem 0 0.7rem;
+  font-size: 0.95rem;
+  color: var(--om-ink);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.site-catbar a:hover {
+  color: var(--om-blue-dark);
+}
+
+.site-catbar a[aria-current='page'] {
+  color: var(--om-blue-dark);
+  border-bottom-color: var(--om-blue-dark);
+  font-weight: 500;
+}
+
+/* The search drops to its own row; the bar keeps the wordmark and the actions.
+   At 360px the wordmark and a full-width action pair cannot share a row without
+   pushing the page sideways, so the wordmark is allowed to wrap and the text
+   link goes — it is still in the footer and in the tab row below. */
+@media (max-width: 860px) {
+  .site-header-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem 1rem;
+  }
+  .site-header-search {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+  .site-catbar ul {
+    gap: 1.6rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-wordmark-left {
+    white-space: normal;
+    font-size: 1rem;
+    line-height: 1.15;
+  }
+  .site-header-inner-page .site-header-nav a:not(.site-header-cta) {
+    display: none;
+  }
+  .site-header-inner-page .site-header-nav a.site-header-cta {
+    font-size: 0.85rem;
+    padding: 0.55rem 0.85rem;
+  }
+}
+
+/* ============================================================
+   Calculator page — prose column with the tool in a right rail
+   ============================================================ */
+
+.calc-page {
+  background: var(--om-wash);
+  padding: 2rem 0 4.5rem;
+}
+
+.calc-page-inner {
+  width: min(72rem, 92%);
+  margin: 0 auto;
+}
+
+.calc-crumb {
+  font-size: 0.875rem;
+  color: var(--om-ink-soft);
+  margin: 0 0 1.5rem;
+}
+
+.calc-crumb a {
+  color: var(--om-ink-soft);
+  text-decoration: none;
+}
+
+.calc-crumb a:hover {
+  color: var(--accent);
+}
+
+/* Phone order: heading, then the tool, then the explanation. On a wide screen
+   the tool lifts into a right rail spanning both rows of the left column. */
+.calc-page-grid {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-areas:
+    'head'
+    'tool'
+    'body';
+}
+
+.calc-head { grid-area: head; min-width: 0; }
+.calc-side { grid-area: tool; min-width: 0; }
+.calc-body { grid-area: body; min-width: 0; }
+
+@media (min-width: 1000px) {
+  .calc-page-grid {
+    grid-template-columns: minmax(0, 1fr) 23rem;
+    grid-template-areas:
+      'head tool'
+      'body tool';
+    column-gap: 3rem;
+    row-gap: 2rem;
+  }
+}
+
+.calc-updated {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--om-ink-soft);
+}
+
+.calc-updated strong {
+  color: var(--om-ink);
+  font-weight: 600;
+}
+
+.calc-title {
+  margin: 0.6rem 0 0;
+  font-size: clamp(1.75rem, 1.2rem + 1.9vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.calc-summary {
+  margin: 1.5rem 0 0;
+  max-width: 68ch;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* The machine-facing sentence. Still on the page verbatim, set quieter than the
+   human opener above it. */
+.calc-definition {
+  margin: 1rem 0 0;
+  max-width: 68ch;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--om-ink-soft);
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--om-rule);
+}
+
+/* ---- table of contents ---- */
+
+.calc-toc {
+  margin: 0;
+}
+
+.calc-toc-title {
+  margin: 0 0 0.9rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.calc-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.calc-toc li {
+  position: relative;
+  padding-left: 1.1rem;
+}
+
+/* The reference marks each entry with a small grey dot rather than a bullet. */
+.calc-toc li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #b9bed3;
+}
+
+.calc-toc a {
+  font-size: 0.975rem;
+  color: var(--om-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.calc-toc a:hover {
+  color: var(--om-ink);
+}
+
+/* ---- body prose ---- */
+
+.calc-prose {
+  max-width: 68ch;
+  margin-top: 2.75rem;
+}
+
+.calc-prose > h2:first-child {
+  margin-top: 0;
+}
+
+.calc-prose h2 {
+  margin: 2.75rem 0 0;
+  font-size: clamp(1.3rem, 1.1rem + 0.6vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  /* so an anchor jump does not tuck the heading under the sticky header */
+  scroll-margin-top: 6rem;
+}
+
+.calc-prose p {
+  margin: 1rem 0 0;
+  line-height: 1.7;
+}
+
+/* list-style is restated because Tailwind's preflight strips markers from
+   every ul, and these lists want them. */
+.calc-prose ul {
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+  line-height: 1.65;
+}
+
+.calc-prose li + li {
+  margin-top: 0.6rem;
+}
+
+.calc-prose li::marker {
+  color: var(--om-ink-soft);
+}
+
+.calc-prose a {
+  color: var(--om-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.calc-prose .table-scroll {
+  margin: 1.25rem 0 0;
+}
+
+.calc-prose table.assumptions-table {
+  background: var(--om-paper);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.calc-colophon {
+  margin: 3rem 0 0;
+  max-width: 68ch;
+  border-top: 1px solid var(--om-rule);
+  padding-top: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--om-ink-soft);
+}
+
+.calc-colophon a {
+  color: var(--om-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+table.reference-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: var(--om-paper);
+}
+
+table.reference-table th,
+table.reference-table td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+table.reference-table th {
+  font-weight: 600;
+  background: var(--om-tile);
+  white-space: nowrap;
+}
+
+/* Figures line up in columns, so the digits should too. */
+table.reference-table td + td {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.calc-table-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--om-ink-soft);
+}
+
+.calc-derivation {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--om-ink-soft);
+}
+
+/* ---- right rail ---- */
+
+.calc-side-sticky {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1000px) {
+  .calc-side-sticky {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+/* "Check out N similar …" — cream header strip over a list of arrow rows. */
+.calc-similar {
+  border: 1px solid var(--om-rule);
+  border-radius: 0.75rem;
+  background: var(--om-paper);
+  overflow: hidden;
+}
+
+.calc-similar-head {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: #fdf6e3;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.calc-similar-head strong {
+  color: var(--om-blue-dark);
+  font-weight: 600;
+}
+
+.calc-similar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.calc-similar a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--om-ink);
+  text-decoration: none;
+}
+
+.calc-similar a svg {
+  flex-shrink: 0;
+  color: var(--om-blue-dark);
+  transition: transform 0.15s ease;
+}
+
+.calc-similar a:hover {
+  background: var(--om-wash);
+}
+
+.calc-similar a:hover svg {
+  transform: translateX(2px);
+}
+
+.calc-similar .calc-similar-all {
+  background: #f2f5ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calc-similar a svg {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   Category page
+   ============================================================ */
+
+.cat-page {
+  background: var(--om-wash);
+  padding: 2.5rem 0 4.5rem;
+  min-height: 60vh;
+}
+
+.cat-page-inner {
+  width: min(64rem, 92%);
+  margin: 0 auto;
+}
+
+.cat-page-crumb {
+  font-size: 0.875rem;
+  color: var(--om-ink-soft);
+  margin: 0 0 1.5rem;
+}
+
+.cat-page-crumb a {
+  color: var(--om-ink-soft);
+  text-decoration: none;
+}
+
+.cat-page-crumb a:hover {
+  color: var(--accent);
+}
+
+.cat-page-title {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0;
+  font-size: clamp(1.9rem, 1.2rem + 2.2vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* The blue rounded-square icon badge the reference sets beside the heading. */
+.cat-page-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: var(--om-blue-dark);
+  color: #fff;
+}
+
+.cat-page-badge svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cat-page-count {
+  margin: 0.9rem 0 0;
+  font-size: 1.05rem;
+  color: var(--om-ink-soft);
+}
+
+.cat-page-intro {
+  margin: 1.5rem 0 0;
+  max-width: 62ch;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.cat-page-sub {
+  margin: 2.75rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.cat-page-cover {
+  margin: 0.85rem 0 0;
+  max-width: 66ch;
+  line-height: 1.7;
+}
+
+.cat-page-list {
+  list-style: disc;
+  margin: 3rem 0 0;
+  padding: 0 0 0 1.25rem;
+  display: grid;
+  gap: 2rem 3.5rem;
+}
+
+@media (min-width: 780px) {
+  .cat-page-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.cat-page-list li {
+  break-inside: avoid;
+}
+
+.cat-page-list li::marker {
+  color: var(--om-ink);
+}
+
+.cat-page-list a {
+  font-size: 1.05rem;
+  color: var(--om-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cat-page-list a:hover {
+  color: var(--om-ink);
+}
+
+.cat-page-desc {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--om-ink-soft);
+}
+
+.cat-page-empty {
+  margin: 2.5rem 0 0;
+  font-size: 1rem;
+  color: var(--om-ink-soft);
+}
+
+.cat-page-empty a {
+  color: var(--om-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ============================================================
+   Hero — soft multi-colour wash with the broken rings bleeding
+   off the corners
+   ============================================================ */
+
 .home-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(170deg, var(--om-wash) 0%, var(--om-wash-2) 100%);
+  background:
+    radial-gradient(46rem 26rem at 10% 12%, #fdf1e6 0%, rgb(253 241 230 / 0) 62%),
+    radial-gradient(40rem 24rem at 40% 0%, #fbe9f1 0%, rgb(251 233 241 / 0) 60%),
+    radial-gradient(44rem 28rem at 76% 18%, #e6eefd 0%, rgb(230 238 253 / 0) 64%),
+    radial-gradient(40rem 26rem at 98% 70%, #eef1ff 0%, rgb(238 241 255 / 0) 60%),
+    linear-gradient(180deg, #fafbff 0%, #f4f6ff 100%);
 }
 
-/* Arc rings — positioned so each one is cropped by the section edge, as the
-   reference does. The drawing itself is components/arcs.tsx. */
+/* Arc rings — each cropped by the section edge, as the reference does.
+   The drawing itself is components/arcs.tsx. */
 .om-ring {
   position: absolute;
   pointer-events: none;
   display: block;
 }
+
 .om-ring svg {
   width: 100%;
   height: 100%;
   display: block;
 }
+
+/* Geometry read off the reference: a small ring tucked into the top-left
+   corner, a larger one cut by the right edge lower down. Each is mostly cropped
+   away — only a crescent shows. */
 .om-ring-tl {
-  top: -21rem;
-  left: -19rem;
-  width: 34rem;
-  height: 34rem;
+  top: -5.7rem;
+  left: -5.6rem;
+  width: 15rem;
+  height: 15rem;
 }
+
 .om-ring-br {
-  right: -21rem;
-  bottom: -21rem;
-  width: 38rem;
-  height: 38rem;
+  top: 9rem;
+  right: -12rem;
+  width: 22rem;
+  height: 22rem;
 }
+
+/* Cropped by the footer's top edge and by the left edge, so the crescent
+   arcs around the right of the brand block without crossing it. */
 .om-ring-fl {
-  left: -18rem;
-  bottom: -17rem;
-  width: 30rem;
-  height: 30rem;
+  top: -6.4rem;
+  left: -2rem;
+  width: 24rem;
+  height: 24rem;
 }
-/* Below the desktop breakpoint the rings would sit on top of the text rather
-   than behind it, so the second one goes and the first pulls further out. */
+
 @media (max-width: 1100px) {
   .om-ring-br { display: none; }
 }
-@media (max-width: 900px) {
-  .om-ring-tl { width: 22rem; height: 22rem; top: -14rem; left: -13rem; }
+
+/* On a phone the ring would sit on top of the headline rather than behind it,
+   so it pulls further into the corner and the hero gains a little headroom. */
+@media (max-width: 760px) {
+  .om-ring-tl { width: 10rem; height: 10rem; top: -5rem; left: -4.5rem; }
+}
+
+.home-hero {
+  padding-bottom: 3.5rem;
 }
 
 .home-hero-inner {
   position: relative;
   z-index: 1;
-  max-width: 64rem;
+  width: min(74rem, 90%);
   margin: 0 auto;
-  padding: 4.5rem 1.25rem 6rem;
+  padding: 3.5rem 0 0;
   display: grid;
-  gap: 1.75rem;
+  gap: 2rem;
   align-items: center;
 }
 
-@media (min-width: 860px) {
+@media (min-width: 900px) {
   .home-hero-inner {
-    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-    gap: 2.5rem;
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: 3.6rem;
+  }
+}
+
+/* Headroom so the corner ring stays behind the headline rather than on it. */
+@media (max-width: 760px) {
+  .home-hero-inner {
+    padding-top: 5rem;
   }
 }
 
 .home-hero-title {
-  font-size: clamp(1.9rem, 1.1rem + 2.6vw, 2.9rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
   margin: 0;
-  text-wrap: balance;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
 }
 
-/* In the reference the number dwarfs the words around it — "3919 free" is
-   roughly twice the height of "Your life in". */
+/* "Your life in" — the quiet first line, roughly a third the height of the
+   count that follows it. */
+.home-hero-lead {
+  display: block;
+  font-size: clamp(1.05rem, 0.85rem + 0.7vw, 1.35rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.15rem;
+}
+
+/* The number dwarfs everything around it in the reference. */
 .home-hero-count {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.4rem;
   color: var(--om-blue);
-  font-weight: 700;
+  font-size: clamp(2.5rem, 1.5rem + 3.1vw, 3.6rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.home-hero-glyph {
+  margin-top: 0.35em;
+  flex-shrink: 0;
+}
+
+.home-hero-word {
+  display: block;
+  font-size: clamp(2.1rem, 1.35rem + 2.4vw, 3rem);
   letter-spacing: -0.035em;
-  font-size: 1.85em;
-  line-height: 1.02;
-  display: inline-block;
+  line-height: 1.08;
 }
 
 .home-hero-search {
@@ -277,28 +1021,18 @@ table.assumptions-table td {
 
 .home-hero-search input[type='search'] {
   width: 100%;
-  max-width: none;
-  font-size: 1.05rem;
-  padding: 1.25rem 3.75rem 1.25rem 1.6rem;
+  font-size: 1rem;
+  padding: 1.1rem 3.75rem 1.1rem 1.5rem;
   border-radius: 999px;
-  border: 1px solid var(--om-rule);
+  border: 1px solid #e8eaf4;
   background: var(--om-paper);
   color: var(--om-ink);
-  box-shadow: 0 1px 2px rgb(20 22 43 / 0.05), 0 14px 34px -20px rgb(20 22 43 / 0.4);
+  box-shadow: 0 1px 2px rgb(17 20 43 / 0.04), 0 10px 30px -18px rgb(17 20 43 / 0.35);
+  appearance: none;
 }
 
 .home-hero-search input[type='search']::placeholder {
   color: var(--om-ink-soft);
-}
-
-/* The magnifier sits inside the pill on the right, in the accent blue. */
-.home-search-icon {
-  position: absolute;
-  right: 1.4rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--om-blue);
-  pointer-events: none;
 }
 
 .home-hero-search input[type='search']:focus-visible {
@@ -306,30 +1040,62 @@ table.assumptions-table td {
   outline-offset: 2px;
 }
 
-/* White panel that lifts over the hero wash, as on the reference */
-.home-panel {
-  max-width: 64rem;
-  margin: -3rem auto 0;
-  padding: 2rem 1.5rem 2.25rem;
-  background: var(--om-paper);
-  border: 1px solid var(--om-rule);
-  border-radius: 1.5rem;
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 1px 2px rgb(20 22 43 / 0.04), 0 18px 40px -28px rgb(20 22 43 / 0.35);
+/* The magnifier sits inside the pill, on the right, in the accent blue. */
+.home-search-icon {
+  position: absolute;
+  right: 1.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--om-blue);
+  pointer-events: none;
 }
 
+/* ============================================================
+   Category panel — white card lifted over the hero wash
+   ============================================================ */
+
+.home-panel {
+  position: relative;
+  z-index: 2;
+  width: min(80rem, 94%);
+  margin: 4.5rem auto 0;
+  padding: 2.25rem 2rem 2.5rem;
+  background: var(--om-paper);
+  border-radius: 1.5rem;
+  box-shadow: 0 1px 2px rgb(17 20 43 / 0.03), 0 24px 50px -34px rgb(17 20 43 / 0.35);
+}
+
+/* The small dome the reference pushes up out of the panel's top edge. */
+.home-panel::before {
+  content: '';
+  position: absolute;
+  top: -1.3rem;
+  left: 7rem;
+  width: 5rem;
+  height: 1.35rem;
+  background: var(--om-paper);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+@media (max-width: 900px) {
+  .home-panel {
+    margin-top: 2.5rem;
+    padding: 1.75rem 1.25rem 2rem;
+    border-radius: 1.25rem;
+  }
+  .home-panel::before { left: 3rem; }
+}
 
 .home-positioning {
   margin: 0 0 1.5rem;
-  font-size: 1.0625rem;
-  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+  font-size: 1rem;
+  color: var(--om-ink-soft);
 }
 
 .cat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 1rem;
 }
 
 .cat-tile {
@@ -337,20 +1103,25 @@ table.assumptions-table td {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.55rem;
+  min-height: 11rem;
   text-align: center;
   padding: 1.5rem 0.75rem;
-  border: 1px solid var(--om-rule);
-  border-radius: 0.85rem;
-  background: var(--om-paper);
+  border: 1px solid #eef0f7;
+  border-radius: 0.75rem;
+  background: var(--om-tile);
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .cat-tile:hover {
-  border-color: var(--accent);
-  background: var(--background);
+  border-color: var(--om-blue);
+  background: var(--om-paper);
+}
+
+.cat-tile:hover .cat-tile-name {
+  color: var(--om-blue);
 }
 
 .cat-tile:focus-visible {
@@ -363,54 +1134,196 @@ table.assumptions-table td {
   display: inline-flex;
 }
 
+.cat-tile-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
 .cat-tile-name {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
+  letter-spacing: -0.01em;
 }
 
 .cat-tile-count {
-  font-size: 0.78rem;
-  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--om-ink-soft);
 }
 
-/* ---- calculator card grid ---- */
+/* Two tiles a row on a phone rather than one tall column each. */
+@media (max-width: 560px) {
+  .cat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .cat-tile {
+    min-height: 8.5rem;
+    padding: 1.25rem 0.5rem;
+  }
+}
+
+/* ============================================================
+   Trust strip
+   ============================================================ */
+
+.trust-strip {
+  /* Continues the hero wash rather than butting a flat colour against it. */
+  background: linear-gradient(180deg, #f4f6ff 0%, var(--om-wash) 100%);
+}
+
+.trust-strip-inner {
+  width: min(80rem, 94%);
+  margin: 0 auto;
+  padding: 0 0 3.5rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.trust-item {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  background: var(--om-paper);
+  border: 1px solid var(--om-rule);
+  border-radius: 0.5rem;
+  padding: 1.35rem 1.5rem;
+}
+
+.trust-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.trust-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.trust-text {
+  margin: 0.3rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--om-ink-soft);
+}
+
+/* ============================================================
+   Calculator card grid
+   ============================================================ */
 
 .home-section {
-  max-width: 64rem;
-  margin: 3.5rem auto 0;
-  padding: 0 1.25rem;
+  background: var(--om-wash);
+  padding: 3.5rem 0 4.5rem;
+}
+
+.home-section-inner {
+  width: min(80rem, 94%);
+  margin: 0 auto;
 }
 
 .home-section-title {
-  font-size: 1.5rem;
+  font-size: clamp(1.65rem, 1.1rem + 1.7vw, 2.2rem);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.03em;
   text-align: center;
-  margin: 0 0 1.75rem;
+  margin: 0 0 2.75rem;
+}
+
+/* ---- category groups on the index ---- */
+
+.calc-group + .calc-group {
+  margin-top: 3.5rem;
+}
+
+.calc-group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0 0 0.5rem;
+}
+
+.calc-group-icon {
+  color: var(--accent);
+  display: inline-flex;
+}
+
+.calc-group-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.calc-group-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.calc-group-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.calc-group-title a:hover {
+  color: var(--om-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Hairline running out from the heading to the count, as on the reference. */
+.calc-group-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--om-rule);
+}
+
+.calc-group-count {
+  font-size: 0.8125rem;
+  color: var(--om-ink-soft);
+  white-space: nowrap;
+}
+
+.calc-group-blurb {
+  margin: 0 0 1.25rem;
+  max-width: 70ch;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--om-ink-soft);
 }
 
 .calc-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 1.5rem;
 }
 
 .calc-card {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  padding: 1.35rem 1.4rem;
+  gap: 0.85rem;
+  padding: 1.5rem;
   border: 1px solid var(--om-rule);
-  border-radius: 0.85rem;
+  border-radius: 0.5rem;
   background: var(--om-paper);
   color: inherit;
   text-decoration: none;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .calc-card:hover {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 28px -18px rgb(0 0 0 / 0.35);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  box-shadow: 0 1px 2px rgb(17 20 43 / 0.04), 0 14px 30px -20px rgb(17 20 43 / 0.4);
 }
 
 .calc-card:focus-visible {
@@ -422,34 +1335,38 @@ table.assumptions-table td {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .calc-card-title {
-  font-weight: 600;
-  line-height: 1.3;
+  font-weight: 700;
+  font-size: 0.975rem;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
 .calc-card-arrow {
-  color: var(--accent);
+  color: var(--om-ink);
   flex-shrink: 0;
+  margin-top: 0.15rem;
   transition: transform 0.15s ease;
 }
 
 .calc-card:hover .calc-card-arrow {
   transform: translateX(2px);
+  color: var(--accent);
 }
 
 .calc-card-desc {
   font-size: 0.875rem;
-  line-height: 1.55;
-  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+  line-height: 1.6;
+  color: #4c5169;
   flex: 1;
 }
 
 .calc-card-cat {
   font-size: 0.8125rem;
-  color: color-mix(in srgb, var(--foreground) 50%, transparent);
+  color: var(--om-ink-soft);
 }
 
 /* Hide the category tiles while the search box is filtering */
@@ -462,63 +1379,84 @@ body[data-searching='true'] .hide-on-search {
    ============================================================ */
 
 .site-footer {
-  margin-top: 4rem;
-  border-top: 1px solid var(--om-rule);
+  position: relative;
+  overflow: hidden;
   background: var(--om-paper);
 }
 
 .site-footer-inner {
-  max-width: 64rem;
+  position: relative;
+  z-index: 1;
+  width: min(88rem, 90%);
   margin: 0 auto;
-  padding: 3.25rem 1.25rem;
+  padding: 3.5rem 0 3rem;
   display: grid;
   gap: 2.5rem;
+  min-height: 22rem;
 }
 
-@media (min-width: 860px) {
+@media (min-width: 960px) {
   .site-footer-inner {
-    grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
-    gap: 3rem;
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: 4rem;
   }
 }
 
 /* The reference opens its footer with a short line set large and bold, with
-   the wordmark under it — "We make it count!" at roughly 2rem. */
+   the wordmark under it. */
 .site-footer-tagline {
-  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 1.9rem);
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
   margin: 0;
-  max-width: 12ch;
+  max-width: 9ch;
 }
 
 .site-footer-name {
-  margin: 0.4rem 0 0;
-  font-weight: 600;
-  color: var(--accent);
+  margin: 1.1rem 0 0;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.025em;
+  /* Same reason as the header pill: 18.4px bold is just under the large-text
+     threshold, so this needs the 4.5:1 ratio, not 3:1. */
+  color: var(--om-blue-dark);
 }
 
 .site-footer-note {
-  margin: 0.75rem 0 0;
+  margin: 1rem 0 0;
   font-size: 0.8125rem;
   line-height: 1.6;
-  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+  color: var(--om-ink-soft);
+  max-width: 26ch;
+}
+
+.site-footer-note a {
+  color: var(--accent);
 }
 
 .site-footer-cols {
   display: grid;
-  gap: 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  align-items: start;
 }
 
 .site-footer-heading {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--foreground) 55%, transparent);
-  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--om-ink);
+  margin: 0 0 1.35rem;
+}
+
+/* Categories run in their own multi-column block, as in the reference. */
+.site-footer-col-wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 720px) {
+  .site-footer-col-wide { grid-column: auto; }
 }
 
 .site-footer-cats,
@@ -527,14 +1465,19 @@ body[data-searching='true'] .hide-on-search {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.6rem;
-  font-size: 0.9rem;
+  gap: 1.05rem;
+  font-size: 0.925rem;
+}
+
+.site-footer-cats {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1.05rem 1.5rem;
 }
 
 .site-footer-cats li {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.7rem;
 }
 
 .site-footer-cat-icon {
@@ -543,36 +1486,52 @@ body[data-searching='true'] .hide-on-search {
 }
 
 .site-footer-cat-icon svg {
-  width: 17px;
-  height: 17px;
+  width: 19px;
+  height: 19px;
 }
 
-.site-footer-pending {
-  color: color-mix(in srgb, var(--foreground) 45%, transparent);
+.site-footer-cats a,
+.site-footer-links a {
+  color: var(--om-ink);
+  text-decoration: none;
 }
 
-.site-footer-bar {
-  border-top: 1px solid var(--border);
-  font-size: 0.8125rem;
-  color: color-mix(in srgb, var(--foreground) 55%, transparent);
-}
-
-.site-footer-bar > * {
-  display: block;
-}
-
-@media (min-width: 640px) {
-  .site-footer-bar {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-  }
+.site-footer-cats a:hover,
+.site-footer-links a:hover {
+  color: var(--accent);
 }
 
 .site-footer-bar {
-  max-width: 64rem;
+  border-top: 1px solid var(--om-rule);
+  position: relative;
+  z-index: 1;
+}
+
+.site-footer-bar-inner {
+  width: min(88rem, 90%);
   margin: 0 auto;
-  padding: 1rem 1.25rem 1.75rem;
+  padding: 1.5rem 0 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem 2.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--om-ink-soft);
+}
+
+.site-footer-bar-inner a {
+  color: var(--om-ink-soft);
+  text-decoration: none;
+}
+
+.site-footer-bar-inner a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 960px) {
+  .om-ring-fl { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -583,73 +1542,9 @@ body[data-searching='true'] .hide-on-search {
   }
 }
 
-/* ---- methodology pattern (electricaltoolbox.com) ---- */
-
-.home-eyebrow {
-  /* Set in the sans, not the mono stack: the Omni reference has one type
-     system and a monospaced eyebrow reads as a different site's furniture. */
-  font-family: var(--font-sans);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--om-blue);
-  margin: 0 0 0.9rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-
-.trust-strip {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.trust-strip-inner {
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: 1.5rem 1.25rem;
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-}
-
-.trust-item {
-  display: flex;
-  gap: 0.7rem;
-  align-items: flex-start;
-}
-
-.trust-icon {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.8rem;
-  height: 1.8rem;
-  border-radius: 0.45rem;
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  color: var(--accent);
-}
-
-.trust-title {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  line-height: 1.35;
-}
-
-.trust-text {
-  margin: 0.2rem 0 0;
-  font-size: 0.825rem;
-  line-height: 1.55;
-  color: color-mix(in srgb, var(--foreground) 62%, transparent);
-}
-
-/* The home panel now sits below the trust strip, so drop the overlap */
-.home-panel {
-  margin-top: 2rem;
-}
-
-/* ---- dense categorized index (calculator.net IA) ---- */
+/* ============================================================
+   Dense categorized index (used by /category pages)
+   ============================================================ */
 
 .index-grid {
   display: grid;
@@ -687,7 +1582,6 @@ body[data-searching='true'] .hide-on-search {
   height: 18px;
 }
 
-/* Hairline that runs out from the heading, as on the reference */
 .index-rule {
   flex: 1;
   height: 1px;
@@ -698,7 +1592,7 @@ body[data-searching='true'] .hide-on-search {
   margin: 0 0 0.9rem;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+  color: var(--om-ink-soft);
 }
 
 .index-list {
@@ -728,122 +1622,5 @@ body[data-searching='true'] .hide-on-search {
   margin-top: 0.15rem;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: color-mix(in srgb, var(--foreground) 60%, transparent);
-}
-
-.home-section-title {
-  text-align: left;
-}
-
-/* ---- narrow screens: stack the result label above its value ----
-   At 360–400px a long label plus a 7-digit mono figure plus its unit cannot
-   share a row without the unit wrapping away from the number. Stacking keeps
-   the figure and its unit together, which is the part that has to stay
-   readable (TASK-1 §7: result numbers large and mono, inputs stacked on
-   mobile). Reverts to a single row as soon as there is width for it. */
-@media (max-width: 30rem) {
-  .calculator-result {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.15rem;
-    align-items: start;
-  }
-
-  .calculator-result-value {
-    font-size: 1.375rem;
-    white-space: nowrap;
-  }
-
-  .calculator-result-unit {
-    white-space: nowrap;
-  }
-}
-
-/* ============================================================
-   Header — Omni's centred wordmark on a white bar
-   ============================================================ */
-
-.site-header {
-  background: var(--om-paper);
-  border-bottom: 1px solid var(--om-rule);
-}
-
-.site-header-inner {
-  max-width: 76rem;
-  margin: 0 auto;
-  padding: 1.05rem 1.25rem;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 1rem;
-}
-
-.site-wordmark {
-  justify-self: center;
-  font-weight: 700;
-  font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.35rem);
-  letter-spacing: -0.02em;
-  color: var(--om-ink);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.site-header-nav {
-  justify-self: end;
-  display: flex;
-  gap: 1.5rem;
-  font-size: 0.9rem;
-}
-
-.site-header-nav a {
   color: var(--om-ink-soft);
-  text-decoration: none;
-}
-
-.site-header-nav a:hover {
-  color: var(--om-blue);
-}
-
-@media (max-width: 640px) {
-  .site-header-inner {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 0.6rem;
-  }
-  .site-header-inner > span:first-child { display: none; }
-  .site-header-nav { justify-self: center; }
-}
-
-/* Footer arcs — the same device as the hero, mirrored, as in the reference. */
-.site-footer {
-  position: relative;
-  overflow: hidden;
-  background: var(--om-paper);
-}
-
-.om-arc-3 {
-  inset: auto auto -9rem -7rem;
-  width: 22rem;
-  height: 22rem;
-  border-width: 1rem;
-  border-color: var(--om-yellow) transparent var(--om-red) var(--om-blue);
-  transform: rotate(36deg);
-  opacity: 0.85;
-}
-
-.site-footer-inner {
-  position: relative;
-  z-index: 1;
-}
-
-@media (max-width: 860px) {
-  .om-arc-3 { display: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .calc-card,
-  .calc-card-arrow,
-  .cat-tile {
-    transition: none;
-  }
 }
