@@ -22,7 +22,41 @@ export function CalculatorWidget({ slug }: { slug: string }) {
     return obj;
   }, [mod]);
 
+  /*
+    Every number that reaches compute() passes through here first.
+
+    This used to be `e.target.value === '' ? 0 : Number(e.target.value)`, with
+    nothing enforcing the min the record declares. Clearing a field — which is
+    just what happens when you select-all and retype a number — therefore sent
+    0 into the formula, and on any calculator where that field is a divisor the
+    page rendered "Infinity" as the answer: attic ventilation's ratio, cost per
+    inspection's inspections-per-month, and three of revenue goal's inputs. The
+    querystring sync then wrote `?ratio=0` into the address bar, so the broken
+    state was shareable as a link.
+
+    `min` and `max` on a number input are advisory — browsers do not clamp what
+    you type — so the record's declared range has to be applied in code.
+  */
+  const clampFor = useMemo(() => {
+    const ranges = new Map(mod?.record.inputs.map((i) => [i.key, i]) ?? []);
+    return (key: string, value: number): number => {
+      const range = ranges.get(key);
+      if (!range) return value;
+      if (!Number.isFinite(value)) return range.default;
+      return Math.min(range.max, Math.max(range.min, value));
+    };
+  }, [mod]);
+
   const [inputs, setInputs] = useState<Record<string, number>>(defaultInputs);
+  /*
+    What each box literally shows, while it differs from the committed number.
+    Without this the field could not be emptied at all — every keystroke would
+    be clamped back and typing "1500" into a box whose min is 100 would fight
+    the user at "1". A draft lets the box read exactly what was typed while the
+    result below is computed from the clamped value, and blur snaps the text
+    back to what is actually being used.
+  */
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [hydratedFromUrl, setHydratedFromUrl] = useState(false);
   /* Gates the first querystring write — see the sync effect below. */
   const [readDone, setReadDone] = useState(false);
@@ -39,7 +73,11 @@ export function CalculatorWidget({ slug }: { slug: string }) {
       const next = { ...prev };
       for (const input of mod.record.inputs) {
         const raw = params.get(input.key);
-        if (raw !== null && raw !== '' && !Number.isNaN(Number(raw))) next[input.key] = Number(raw);
+        // Clamped like typed input: a hand-edited or stale link carrying
+        // ?ratio=0 must not be able to do what the keyboard no longer can.
+        if (raw !== null && raw !== '' && !Number.isNaN(Number(raw))) {
+          next[input.key] = clampFor(input.key, Number(raw));
+        }
       }
       return next;
     });
@@ -82,14 +120,27 @@ export function CalculatorWidget({ slug }: { slug: string }) {
             <input
               type="number"
               inputMode="decimal"
-              value={inputs[input.key]}
+              value={drafts[input.key] ?? String(inputs[input.key])}
               min={input.min}
               max={input.max}
               step={input.step ?? 'any'}
               onChange={(e) => {
-                const value = e.target.value === '' ? 0 : Number(e.target.value);
-                setInputs((prev) => ({ ...prev, [input.key]: value }));
+                const raw = e.target.value;
+                setDrafts((prev) => ({ ...prev, [input.key]: raw }));
+                // An empty or half-typed box ("-", "1e") keeps the last good
+                // number in the result rather than substituting zero.
+                const parsed = Number(raw);
+                if (raw !== '' && Number.isFinite(parsed)) {
+                  setInputs((prev) => ({ ...prev, [input.key]: clampFor(input.key, parsed) }));
+                }
               }}
+              onBlur={() =>
+                setDrafts((prev) => {
+                  const next = { ...prev };
+                  delete next[input.key];
+                  return next;
+                })
+              }
             />
             {input.help ? <small className="calculator-input-help">{input.help}</small> : null}
           </label>

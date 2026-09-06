@@ -17,7 +17,7 @@ export const record: CalculatorRecord = {
     { key: 'jobsPerYear', label: 'Jobs needed per year' },
     { key: 'jobsPerWeek', label: 'Jobs needed per week' },
     { key: 'requiredHourlyYield', label: 'Required hourly yield', unit: '$/hr' },
-    { key: 'capacityGap', label: 'Capacity gap (needed vs. available jobs/week)' },
+    { key: 'capacityGap', label: 'Capacity gap (jobs/week; positive = short)' },
   ],
   summary:
     'Turn a target annual income into the number of inspections and the weekly pace a solo inspector needs to hit it.',
@@ -25,14 +25,14 @@ export const record: CalculatorRecord = {
   formulaText: 'Jobs/year = target income ÷ average ticket. Jobs/week = jobs/year ÷ weeks worked/year. Required hourly yield = average ticket ÷ hours per job. Capacity gap = jobs/week needed − maximum jobs/week at the stated working days and hours per workday.',
 
   interpretation:
-    'The capacity gap is the number that matters. A positive gap means the goal fits inside the schedule you described; a negative gap means it does not, and no amount of effort closes it — you have to raise the ticket, add add-on services, or add an inspector. Treat jobs per week as a booking target and check it against your actual booked weeks rather than your best one.',
+    'The capacity gap is the number that matters, and its sign is the whole message: it is the jobs per week you need minus the jobs per week your stated schedule can hold, so a negative gap means the goal fits with room to spare and a positive gap means it does not fit at all. A positive gap cannot be closed by working harder inside the same schedule — the hours are already spoken for — so the levers are raising the ticket, adding ancillary services, working more days, or adding an inspector. Note that available capacity uses whole jobs per day: at eight available hours and three hours a job that is two jobs, not 2.67, because you cannot book two thirds of an inspection. Treat jobs per week as a booking target and check it against your actual booked weeks rather than your best one.',
   assumptions: [
     {
       text: 'Required hourly yield is revenue divided by the hours worked to produce it, and capacity is the jobs a stated schedule can physically hold. Both are definitional arithmetic on the numbers entered, not a figure taken from any outside authority.',
       source: {
         citation: 'Derived \u2014 definitional arithmetic on user-entered figures',
         derivation:
-          'Every output is a direct division or subtraction of the inputs, with no constant, rate or table taken from elsewhere. Jobs per year is the target income divided by the average ticket. Jobs per week is that figure divided by the weeks worked. Required hourly yield is the average ticket divided by the hours each job consumes. Capacity gap subtracts the jobs per week needed from the jobs per week the stated working days and hours can hold. There is nothing here to cite because there is no external claim: change an input and the arithmetic follows it exactly.',
+          'Every output is a direct division or subtraction of the inputs, with no constant, rate or table taken from elsewhere. Jobs per year is the target income divided by the average ticket. Jobs per week is that figure divided by the weeks worked. Required hourly yield is the average ticket divided by the hours each job consumes. Capacity gap subtracts the jobs per week the stated working days and hours can hold from the jobs per week needed, so it is positive when the schedule is short and negative when it has room; available capacity rounds down to whole jobs per day, since a partly booked inspection is not a booking. There is nothing here to cite because there is no external claim: change an input and the arithmetic follows it exactly.',
       },
     },
   ],
@@ -42,7 +42,7 @@ export const record: CalculatorRecord = {
   ],
   examples: [{ label: '$150k target, $550 ticket', inputs: { targetIncome: 150000, avgTicket: 550, daysPerWeek: 4, hoursPerJob: 3, hoursPerWorkday: 8, weeksWorkedPerYear: 48 } }],
   related: ['inspection-business-profitability-calculator'],
-  datePublished: '2026-09-03', dateModified: '2026-09-03',
+  datePublished: '2026-09-03', dateModified: '2026-09-07',
 };
 
 export function compute(i: Record<string, number>) {

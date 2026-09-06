@@ -223,6 +223,51 @@ This one does not, because the prose fields are genuinely written per calculator
 figures fell rather than rose after four pages roughly doubled in length — that is the test
 that the added prose is real content and not padding.
 
+### Calculator audit 2026-09-07 — two defects, both fixed
+
+Every calculator was exercised rather than eyeballed: each one run at its defaults, its
+declared minimums, its maximums, its worked example, and with each input cleared in turn;
+every server-rendered value compared against `compute()`; and 27 figures recomputed by hand
+from the stated formulas rather than from the code that produces them.
+
+**Result: all 12 calculators compute correctly. 54 of 54 rendered values match `compute()`
+exactly, and every hand-check agrees to the calculator's own rounding.**
+
+Two real defects were found:
+
+**1. Clearing an input rendered "Infinity" — `src/components/calculator-widget.tsx`.**
+The change handler read `e.target.value === '' ? 0 : Number(e.target.value)` with nothing
+enforcing the declared `min`. Emptying a field — which is what select-all-and-retype does —
+sent 0 into the formula, and where that field was a divisor the page displayed `Infinity`
+as the answer. Five fields across three calculators were affected:
+
+```
+attic ventilation       Ratio
+cost per inspection     Inspections completed per month
+revenue goal            Average ticket price, Hours per job, Weeks worked per year
+```
+
+Worse, the querystring sync then wrote `?ratio=0` into the address bar, so the broken state
+was shareable as a link. `min` and `max` on a number input are advisory — browsers do not
+clamp what is typed — so the range now has to be, and is, applied in code, on both the typed
+path and the shared-link path. A field can still be emptied while editing; the result holds
+the last good value and the box snaps back to the clamped number on blur.
+
+**2. Revenue Goal explained its own headline number backwards.** `compute()` and
+`formulaText` agreed that the capacity gap is *jobs needed − jobs the schedule can hold*, so
+a negative gap means the goal fits. The interpretation said the opposite — "a positive gap
+means the goal fits… a negative gap means it does not, and no amount of effort closes it" —
+and the written derivation had the subtraction the other way round. On the default inputs
+the page showed −2.32 and told the reader their goal was unreachable when they needed 5.68
+jobs a week against a capacity of 8. The interpretation and derivation are corrected to
+match the arithmetic, and the output label now states the sign convention outright.
+
+Not defects, checked and cleared: three inputs on the software pricing calculator
+(`flatAdditionalSeat`, `tier2Rate`, `tier3Rate`) appear inert at the defaults because they
+are conditional — they engage above one inspector or at higher volumes, confirmed by
+varying those. Negative values entered anywhere produce negative arithmetic rather than
+NaN, which is honest.
+
 ### SEO review 2026-09-07 — eight defects, all fixed
 
 Reviewed against the running build rather than from memory. Commits `83622d4` and
@@ -422,11 +467,12 @@ appears, the domain is behind Cloudflare Managed robots.txt — stop and fix tha
 
 ## 6. Smaller things worth a look
 
-- **Effective hourly rate** on the profitability calculator divides *revenue* (not profit)
-  by drive plus report time only, excluding time on site. For the worked example that
-  reports $432/hr, which no inspector will believe. The task file's own input list for §6 #1
-  omits inspection duration, so the build follows the spec — the spec is what's off. Say the
-  word and I'll add an on-site hours input and compute from profit.
+- ~~**Effective hourly rate**~~ **Already fixed — this entry was stale.** It was closed in
+  `34c252a`, before the 2026-09-07 review, and this document went on listing it as open.
+  The calculator now takes `avgOnSiteMin` as an input, counts on-site minutes in
+  `totalHours`, and computes the rate from owner pay plus net profit rather than from
+  revenue. On the defaults it reports **$106.96/hr** against 1,080 working hours, not the
+  $432/hr this entry claimed. Verified by hand: (90,000 + 25,520) ÷ 1,080 = 106.96.
 - **`grep -c 'application/ld+json'` in §4 cannot pass as written.** `grep -c` counts lines,
   and Next.js minifies the page onto one, so it returns 1 regardless. Suggest amending the
   task file to `grep -o '<script type="application/ld+json">' … | wc -l`. The real counts
