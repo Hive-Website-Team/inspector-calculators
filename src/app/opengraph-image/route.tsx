@@ -10,8 +10,6 @@ import { SITE_NAME, SITE_TAGLINE } from '@/lib/site';
   which is also the only thing worth reading at thumbnail size in a group chat.
 */
 
-export const runtime = 'edge';
-
 const BLUE = '#1e57ea';
 const INK = '#11142b';
 const WASH = '#f7f8fe';

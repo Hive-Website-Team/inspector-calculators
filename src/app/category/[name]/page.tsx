@@ -4,7 +4,7 @@ import { calculators } from '@/calculators';
 import { CATEGORY_LABELS, categoryBlurb, categoryCoverage, categoryLabel } from '@/lib/categories';
 import { categoryIcon } from '@/lib/category-icons';
 import { pageMetadata } from '@/lib/page-metadata';
-import { SITE_URL, absoluteUrl } from '@/lib/site';
+import { SITE_URL, absoluteUrl, collectionPageSchema } from '@/lib/site';
 
 export function generateStaticParams() {
   // Only categories holding a calculator get a page. The empty ones were
@@ -59,9 +59,25 @@ export default async function CategoryPage({ params }: { params: Promise<{ name:
     ],
   };
 
+  /* The calculators this page lists, enumerated. The breadcrumb above says
+     where the page sits; this says what is on it. */
+  const collectionJsonLd = collectionPageSchema({
+    name: `${label} calculators`,
+    description: `${list.length} free ${label.toLowerCase()} ${
+      list.length === 1 ? 'calculator' : 'calculators'
+    } for home inspectors. ${categoryBlurb(name)}`,
+    path: `/category/${name}`,
+    items: list.map(({ record }) => ({
+      slug: record.slug,
+      title: record.title,
+      definition: record.definition,
+    })),
+  });
+
   return (
     <div className="cat-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <div className="cat-page-inner">
         <nav aria-label="Breadcrumb" className="cat-page-crumb">
           <a href="/">Home</a> <span aria-hidden="true">›</span> <span>{label}</span>

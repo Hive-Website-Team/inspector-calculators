@@ -35,11 +35,18 @@ export const SITE_TAGLINE = 'Free calculators for professional home inspectors. 
  * Crawlers discount an always-now lastmod, and every page claiming to have
  * changed on every build is a negative signal. Bump this when content changes.
  */
-export const CONTENT_LAST_REVIEWED = new Date('2026-09-03');
+export const CONTENT_LAST_REVIEWED = new Date('2026-09-07');
 
 export const ids = {
   organization: `${SITE_URL}/#organization`,
   website: `${SITE_URL}/#website`,
+  /*
+    Every calculator is one entity that two kinds of page describe: its own
+    page declares it in full, the home and category listings reference it.
+    Both sides use this `@id` so a consumer resolves them to a single node
+    rather than to a full record and an unrelated near-duplicate stub.
+  */
+  calculator: (slug: string) => `${SITE_URL}/${slug}#calculator`,
 } as const;
 
 /** Where a reader reports a wrong formula, source or default. */
@@ -89,6 +96,64 @@ export function websiteSchema() {
         urlTemplate: `${SITE_URL}/?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
+/**
+ * The machine-readable half of a listing page.
+ *
+ * The home page and every category page are, structurally, a list of tools —
+ * and until now nothing said so. They carried the Organization and WebSite
+ * nodes from the layout plus a BreadcrumbList, so a crawler could tell what
+ * the site was and where the page sat, but nothing enumerated what the page
+ * actually lists. For a directory whose entire job is enumeration that is the
+ * one node worth having: an answer engine asked "what calculators exist for
+ * home inspectors" can read the list instead of inferring it from anchor text.
+ *
+ * Each entry references the calculator's own `@id`, so this resolves to the
+ * same node the calculator page declares in full rather than to a stub.
+ */
+export function collectionPageSchema({
+  name,
+  description,
+  path,
+  items,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  items: { slug: string; title: string; definition: string }[];
+}) {
+  const url = absoluteUrl(path);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${url}#collection`,
+    url,
+    name,
+    description,
+    isPartOf: { '@id': ids.website },
+    publisher: { '@id': ids.organization },
+    inLanguage: 'en-US',
+    mainEntity: {
+      '@type': 'ItemList',
+      name,
+      numberOfItems: items.length,
+      itemListOrder: 'https://schema.org/ItemListOrderAscending',
+      itemListElement: items.map((item, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@type': 'WebApplication',
+          '@id': ids.calculator(item.slug),
+          name: item.title,
+          url: absoluteUrl(`/${item.slug}`),
+          description: item.definition,
+          applicationCategory: 'BusinessApplication',
+          isAccessibleForFree: true,
+        },
+      })),
     },
   };
 }

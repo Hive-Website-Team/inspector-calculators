@@ -5,6 +5,7 @@ import { categoryIcon } from '@/lib/category-icons';
 import { CalculatorSearch } from '@/components/calculator-search';
 import { HeroArcs } from '@/components/arcs';
 import { pageMetadata } from '@/lib/page-metadata';
+import { collectionPageSchema } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata({
   title: 'Free calculators for home inspectors',
@@ -69,8 +70,24 @@ export default function HomePage() {
     return cut > 60 ? `${definition.slice(0, cut)}.` : definition;
   };
 
+  /* Every calculator on the site, enumerated for machines. The visible index
+     below says the same thing in anchor text; this says it in a form an answer
+     engine can read without parsing a card grid. */
+  const collectionJsonLd = collectionPageSchema({
+    name: 'All calculators',
+    description:
+      'Every calculator on Inspector Calculators, grouped by category. Each one states its formula, its assumptions and the primary source behind them.',
+    path: '/',
+    items: calculators.map(({ record }) => ({
+      slug: record.slug,
+      title: record.title,
+      definition: record.definition,
+    })),
+  });
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <div className="home-hero">
         {/* Omni's broken rings, cropped by the section edges. Decoration only. */}
         <HeroArcs />

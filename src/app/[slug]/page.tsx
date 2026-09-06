@@ -48,6 +48,9 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
   const webApplicationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
+    // Same `@id` the home and category ItemLists point at, so the listing
+    // entry and this full record resolve to one node, not two.
+    '@id': ids.calculator(record.slug),
     name: record.title,
     url,
     // The definition is the sentence an answer engine is most likely to quote.
@@ -253,7 +256,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
                         <td>{a.text}</td>
                         <td>
                           {a.source.url ? (
-                            <a href={a.source.url} target="_blank" rel="noopener noreferrer nofollow">
+                            <a href={a.source.url} target="_blank" rel="noopener noreferrer">
                               {a.source.citation}
                             </a>
                           ) : (
@@ -294,7 +297,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
                   <li key={i}>
                     {a.source.url ? (
                       <>
-                        <a href={a.source.url} target="_blank" rel="noopener noreferrer nofollow">
+                        <a href={a.source.url} target="_blank" rel="noopener noreferrer">
                           {a.source.citation}
                         </a>{' '}
                         — accessed {a.source.accessed}
