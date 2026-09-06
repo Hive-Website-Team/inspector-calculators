@@ -21,7 +21,13 @@ export const record: CalculatorRecord = {
     { key: 'workingCapitalReserve', label: 'Working capital reserve', unit: '$' },
     { key: 'totalCashNeeded', label: 'Total cash needed to launch', unit: '$' },
   ],
+  summary:
+    'Total the one-time and first-year costs of launching an inspection business, plus the working capital to survive it.',
+
   formulaText: 'Total startup cost = equipment + insurance + training + licensing + software + marketing. Working capital reserve = monthly overhead × working capital months. Total cash needed = total startup cost + working capital reserve.',
+
+  interpretation:
+    'Total cash needed, not total startup cost, is the number to raise or save before quitting a job. The working capital reserve is what carries you through the months before referral flow builds, and three months is optimistic for a business whose first year depends on agent relationships that do not exist yet. Licensing and insurance defaults are illustrative — replace both with real quotes for your state before committing to the figure.',
   assumptions: [
     { text: "The default software cost uses Spectora's published monthly report-writing software plan, used as one realistic starting point for an inspector's own numbers.",
       source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-03' } },

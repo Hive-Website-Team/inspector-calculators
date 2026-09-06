@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/page-metadata';
+import { CORRECTIONS_EMAIL } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'Methodology' };
+export const metadata: Metadata = pageMetadata({
+  title: 'Methodology',
+  description:
+    'How formulas are chosen, how every source is cited and dated, how often values are re-verified, and how to report an error.',
+  path: '/methodology',
+});
 
 export default function MethodologyPage() {
   return (
@@ -32,8 +39,11 @@ export default function MethodologyPage() {
 
       <h2 className="mt-8 text-lg font-semibold">Reporting an error</h2>
       <p className="mt-2 leading-relaxed">
-        If a formula, source, or default value looks wrong, tell us which calculator and what looks off.
-        Corrections that come with a better primary source are handled fastest.
+        If a formula, source, or default value looks wrong, write to{' '}
+        <a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a> and say which
+        calculator and what looks off. Corrections that come with a better primary source
+        are handled fastest, and anything that changes a formula or a figure is logged in
+        the <a href="/changelog">changelog</a> with the date it changed.
       </p>
 
       <h2 className="mt-8 text-lg font-semibold">What this site will not do</h2>

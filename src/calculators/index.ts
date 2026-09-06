@@ -11,6 +11,7 @@ import * as atticVentilation from './attic-ventilation';
 import * as stairRiseRun from './stair-rise-run';
 import * as deckJoistSpan from './deck-joist-span';
 import * as guardHandrailHeight from './guard-handrail-height';
+import * as waterHeaterSizing from './water-heater-sizing';
 
 export interface CalculatorModule {
   record: CalculatorRecord;
@@ -30,6 +31,7 @@ export const calculators: CalculatorModule[] = [
   stairRiseRun,
   deckJoistSpan,
   guardHandrailHeight,
+  waterHeaterSizing,
 ];
 
 export function getCalculator(slug: string): CalculatorModule | undefined {

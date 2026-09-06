@@ -8,7 +8,8 @@
     "start": "next start",
     "check:content": "tsx scripts/check-content.mjs",
     "check:ssr": "node scripts/check-ssr.mjs",
-    "check:sources": "tsx scripts/check-sources.mjs"
+    "check:sources": "tsx scripts/check-sources.mjs",
+    "indexnow": "node scripts/indexnow-submit.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

@@ -42,6 +42,9 @@ export const ids = {
   website: `${SITE_URL}/#website`,
 } as const;
 
+/** Where a reader reports a wrong formula, source or default. */
+export const CORRECTIONS_EMAIL = 'corrections@inspectorcalculators.com';
+
 export function organizationSchema() {
   return {
     '@type': 'Organization',
@@ -49,6 +52,22 @@ export function organizationSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     description: SITE_TAGLINE,
+    logo: {
+      '@type': 'ImageObject',
+      '@id': `${SITE_URL}/#logo`,
+      url: absoluteUrl('/icon'),
+      width: 512,
+      height: 512,
+      caption: SITE_NAME,
+    },
+    // Something for a reader — and for Google's entity model — to attach a
+    // reputation to. The site takes corrections; this is where they land.
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'editorial corrections',
+      email: CORRECTIONS_EMAIL,
+      availableLanguage: 'English',
+    },
   };
 }
 
@@ -61,6 +80,16 @@ export function websiteSchema() {
     description: SITE_TAGLINE,
     publisher: { '@id': ids.organization },
     inLanguage: 'en-US',
+    // The inner-page header search is a plain GET form to /?q=, so this is a
+    // real endpoint rather than a decorative claim.
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
   };
 }
 

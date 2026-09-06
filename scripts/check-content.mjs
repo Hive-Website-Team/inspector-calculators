@@ -38,10 +38,15 @@ for (const mod of calculators) {
 
   const record = parsed.data;
 
-  // Every source URL must be a usable, well-formed URL. Two assumptions on
+  // Every cited source must carry a usable, well-formed URL. Two assumptions on
   // the same calculator citing the identical URL is allowed (e.g. two facts
   // from the same code section) — this only flags malformed URLs.
+  //
+  // A derived source has no URL by design; the schema already refuses one that
+  // offers neither a citation nor a derivation, so there is nothing to add here
+  // beyond skipping the URL check for it.
   record.assumptions.forEach((a, i) => {
+    if (a.source.derivation !== undefined) return;
     try {
       // eslint-disable-next-line no-new
       new URL(a.source.url);

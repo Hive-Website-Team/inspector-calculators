@@ -15,7 +15,13 @@ export const record: CalculatorRecord = {
     { key: 'marginPerInspection', label: 'Margin per inspection', unit: '$' },
     { key: 'marginPercent', label: 'Margin percent', unit: '%' },
   ],
+  summary:
+    'Divide your monthly operating costs by the inspections you completed to see what a single job actually costs you to deliver.',
+
   formulaText: 'Cost per inspection = total monthly operating costs ÷ inspections per month. Margin per inspection = average ticket − cost per inspection. Margin percent = margin per inspection ÷ average ticket.',
+
+  interpretation:
+    'Cost per inspection is your floor. Any ticket below it loses money on every job no matter how busy you are. Read the margin percent rather than the dollar margin: below about 30% a single slow month or one insurance claim wipes out the year. If the number surprises you, the usual cause is counting only software and insurance while leaving out vehicle, phone and your own unpaid admin hours.',
   assumptions: [
     { text: "Default monthly operating costs use Spectora's published software plan as one representative cost line among the categories an inspector should total.",
       source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-03' } },

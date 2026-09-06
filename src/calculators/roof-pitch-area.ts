@@ -29,8 +29,34 @@ export const record: CalculatorRecord = {
     { key: 'slopePercent', label: 'Slope', unit: '%' },
     { key: 'asphaltShingleMargin', label: 'Rise above the 2:12 asphalt shingle minimum', unit: 'in' },
   ],
+  summary:
+    'Convert a rise-per-12 measurement into a pitch multiplier, angle and percent slope, and get the true sloped roof area.',
+
   formulaText:
-    'Pitch multiplier = √(rise² + 12²) ÷ 12. Sloped roof area = footprint area × pitch multiplier. Angle = arctan(rise ÷ 12). Slope percent = rise ÷ 12 × 100. Common multipliers: 3/12 = 1.0308, 4/12 = 1.0541, 5/12 = 1.0833, 6/12 = 1.1180, 7/12 = 1.1577, 8/12 = 1.2019, 9/12 = 1.2500, 10/12 = 1.3017, 12/12 = 1.4142.',
+    'Pitch multiplier = √(rise² + 12²) ÷ 12. Sloped roof area = footprint area × pitch multiplier. Angle = arctan(rise ÷ 12). Slope percent = rise ÷ 12 × 100.',
+
+  interpretation:
+    'The sloped area is the surface a roofer actually covers, which is what makes a material estimate realistic — but it is a plane-surface figure, so add an allowance for hips, valleys, ridge caps and waste on top. The slope result also decides what covering is permitted: below 2:12 asphalt shingles are not allowed at all, and between 2:12 and 4:12 they require double underlayment. A shingle roof under 2:12 is a reportable installation defect regardless of its condition.',
+  referenceTable: {
+    caption: 'Roof pitch multipliers, angles and percent slopes',
+    columns: ['Pitch (rise:12)', 'Multiplier', 'Angle', 'Slope'],
+    rows: [
+      ['1:12', '1.0035', '4.76\u00b0', '8.3%'],
+      ['2:12', '1.0138', '9.46\u00b0', '16.7%'],
+      ['3:12', '1.0308', '14.04\u00b0', '25.0%'],
+      ['4:12', '1.0541', '18.43\u00b0', '33.3%'],
+      ['5:12', '1.0833', '22.62\u00b0', '41.7%'],
+      ['6:12', '1.1180', '26.57\u00b0', '50.0%'],
+      ['7:12', '1.1577', '30.26\u00b0', '58.3%'],
+      ['8:12', '1.2019', '33.69\u00b0', '66.7%'],
+      ['9:12', '1.2500', '36.87\u00b0', '75.0%'],
+      ['10:12', '1.3017', '39.81\u00b0', '83.3%'],
+      ['11:12', '1.3566', '42.51\u00b0', '91.7%'],
+      ['12:12', '1.4142', '45.00\u00b0', '100.0%'],
+    ],
+    note: 'Multiplier = \u221a(rise\u00b2 + 12\u00b2) \u00f7 12. Multiply the horizontal footprint area by the multiplier to get the sloped surface area. Geometry, not a code requirement.',
+  },
+
   assumptions: [
     {
       text: 'Asphalt shingles are permitted only on roof slopes of 2 units vertical in 12 units horizontal or greater, and slopes from 2:12 up to 4:12 require double underlayment.',

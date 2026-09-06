@@ -1,10 +1,33 @@
 import { z } from 'zod';
 
-const source = z.object({
-  citation: z.string().min(1),          // "IRC 2024 R806.2"
-  url: z.url(),
-  accessed: z.iso.date(),               // "2026-09-03"
-});
+/*
+  A source is normally a citation: a named authority, a live URL, and the date it
+  was checked. That is the gate.
+
+  The one honest exception is a pure-arithmetic calculator, which has no external
+  authority to cite — the maths is the authority. Borrowing a definition from a
+  secondary source just to satisfy the gate is worse than stating the derivation
+  plainly, so `derivation` is the alternative: it still forces the author to
+  write down why the figure is what it is, at length, and the refine below still
+  refuses a source that offers neither.
+*/
+const source = z
+  .object({
+    citation: z.string().min(1),        // "IRC 2024 R806.2" | "Derived — definitional arithmetic"
+    url: z.url().optional(),
+    accessed: z.iso.date().optional(),
+    derivation: z.string().min(40).optional(),
+  })
+  .refine(
+    (s) => (s.url !== undefined && s.accessed !== undefined) || s.derivation !== undefined,
+    'a source needs either a url plus the date it was accessed, or a written derivation',
+  )
+  .refine(
+    (s) => !(s.url !== undefined && s.derivation !== undefined),
+    'a source is either cited or derived, not both',
+  );
+
+export type CalculatorSource = z.infer<typeof source>;
 
 export const calculatorSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
@@ -23,7 +46,34 @@ export const calculatorSchema = z.object({
     help: z.string().optional(),
   })).min(1),
   outputs: z.array(z.object({ key: z.string(), label: z.string(), unit: z.string().optional() })).min(1),
+  /*
+    A short, human first sentence and the meta description. The `definition`
+    above is written for machines — term as subject, dense with qualifiers — and
+    reads as a definition rather than a welcome. This is what a person sees
+    first, and what Google shows in the snippet, so it is capped at 155 so it is
+    never truncated mid-clause.
+  */
+  summary: z.string().min(40).max(155),
+
   formulaText: z.string().min(20),      // plain English, shown on page
+
+  /*
+    What to do with the number. Every calculator stopped at the figure; an
+    inspector still has to decide what it means for the report or the price.
+  */
+  interpretation: z.string().min(60),
+
+  /*
+    A reference table rendered as a table rather than buried in formulaText.
+    These are the most extractable assets on the site — an answer engine lifts a
+    table, not a comma-separated clause inside a paragraph.
+  */
+  referenceTable: z.object({
+    caption: z.string().min(1),
+    columns: z.array(z.string()).min(2),
+    rows: z.array(z.array(z.string())).min(2),
+    note: z.string().optional(),
+  }).optional(),
   assumptions: z.array(z.object({
     text: z.string().min(1),
     source,                             // REQUIRED — this is the build gate

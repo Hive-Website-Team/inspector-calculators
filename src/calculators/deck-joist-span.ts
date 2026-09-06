@@ -14,7 +14,25 @@ export const record: CalculatorRecord = {
     { key: 'spanFeet', label: 'Span — feet', unit: 'ft' },
     { key: 'spanInches', label: 'Span — remainder inches', unit: 'in' },
   ],
+  summary:
+    'Look up the maximum allowable deck joist span for Southern Pine from the American Wood Council\'s prescriptive table.',
+
   formulaText: "Looks up the maximum allowable joist span directly from the American Wood Council's prescriptive span table for Southern Pine, No. 2 grade, at 40 psf live load / 10 psf dead load, wet service conditions, indexed by nominal joist depth and on-center spacing.",
+
+  interpretation:
+    'A joist run longer than the span shown is a structural finding, not a cosmetic one, and it should be written up with the species, size, spacing and measured span so a contractor can act on it without re-measuring. Undersized joists usually show as bounce underfoot or visible sag mid-span. Note the assumption too: this table is wet service conditions, which is what an exposed deck is.',
+  referenceTable: {
+    caption: 'Maximum allowable joist span \u2014 Southern Pine, No. 2 grade',
+    columns: ['Joist size', '12" o.c.', '16" o.c.', '24" o.c.'],
+    rows: [
+      ['2x6', "9'-11\"", "9'-0\"", "7'-7\""],
+      ['2x8', "13'-1\"", "11'-10\"", "9'-8\""],
+      ['2x10', "16'-2\"", "14'-0\"", "11'-5\""],
+      ['2x12', "18'-0\"", "16'-6\"", "13'-6\""],
+    ],
+    note: 'AWC DCA 6-15 Table 2, at 40 psf live load / 10 psf dead load, wet service conditions. Other species groups have shorter allowable spans \u2014 see the limitations below.',
+  },
+
   assumptions: [
     { text: 'Maximum allowable joist spans for Southern Pine, No. 2 grade lumber, assuming 40 psf live load, 10 psf dead load, and wet service conditions.',
       source: { citation: 'AWC DCA 6-15 — Prescriptive Residential Wood Deck Construction Guide, Table 2', url: 'https://web-media.awc.org/wp-content/uploads/2022/02/17210514/AWC-DCA62015-DeckGuide-1804.pdf', accessed: '2026-09-03' } },

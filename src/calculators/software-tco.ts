@@ -22,7 +22,13 @@ export const record: CalculatorRecord = {
     { key: 'monthlyTotal', label: 'Monthly software total', unit: '$/mo' },
     { key: 'perInspectionSoftwareCost', label: 'Software cost per inspection', unit: '$' },
   ],
+  summary:
+    'Add up every recurring tool your inspection business pays for and see the true annual spend and cost per inspection.',
+
   formulaText: 'Monthly total = report software + scheduling + CRM + (payment fee % × monthly revenue) + website + phone + AI + extra seats. True annual software spend = monthly total × 12. Per-inspection software cost = monthly total ÷ inspections per month.',
+
+  interpretation:
+    'The per-inspection figure is the one to carry into pricing — it belongs in your cost per inspection alongside vehicle and insurance. Payment processing is usually the line that surprises people, because a percentage of revenue scales with growth while every other line is flat. If total software is running above roughly 5% of revenue, look for tools that overlap before you look for cheaper ones.',
   assumptions: [
     { text: "Default values for report software and website are Spectora's published monthly plan and Base Website add-on prices, used only as realistic starting points for an inspector's own numbers.",
       source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-03' } },
