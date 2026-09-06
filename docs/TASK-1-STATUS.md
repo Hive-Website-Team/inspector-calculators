@@ -131,21 +131,51 @@ JS disabled          — 12/12 calculators render every result in server HTML (5
 TOC anchors          — 81/81 anchors across 12 pages resolve to an h2 on the page
 ```
 
+```
+Mobile sweep         — 60 page-loads (12 pages x 320/360/390/768/1024px), 0 horizontal overflow
+```
+
 **Carried over from the design rebuild, not re-run since the content work:**
 
 ```
 Lighthouse mobile    — Accessibility 100 · Best Practices 100 · SEO 100 on every page type;
                        Performance 92-97 across runs
 Shareable URLs       — 11/11 restore their inputs and keep the querystring
-Mobile               — 60 page-loads at 320/360/390/768/1024px, no horizontal scroll
 ```
 
-The four expanded pages each gained a reference table, the widest being four columns. Every
-table on a calculator page renders inside a `.table-scroll` wrapper carrying
-`overflow-x: auto` (`src/app/globals.css:183`), verified present on both tables of each
-page, so a wide table scrolls within its own box rather than pushing the document. That is
-the structural guarantee; **a visual mobile pass and a fresh Lighthouse run are still the
-two worth repeating** before launch, since neither has been re-run since the pages grew.
+### The mobile sweep, re-run 2026-09-07 after the tables were added
+
+The four expanded pages each gained a reference table, the widest being four columns, so
+the sweep was repeated rather than carried forward. Twelve pages — home, the three static
+pages, two category pages and six calculator pages including all four that grew — were
+loaded at each of the five widths and measured for
+`documentElement.scrollWidth > clientWidth`. **All 60 came back clean.**
+
+Method note: each page was rendered in a same-origin iframe sized so its CSS viewport
+equals the target exactly (the iframe's own 15px scrollbar is compensated for, otherwise a
+"320px" test is really 305px), which gives true media-query behaviour at precise widths
+without resizing the window sixty times.
+
+Passing the overflow test only proves the wrapper *contained* the table, so the tables were
+measured separately at 320px to confirm they scroll rather than being squashed or clipped:
+
+```
+                                  box     table    scrolls
+cost per inspection            294px     680px     yes
+software TCO                   294px     709px     yes
+startup cost planner           294px     630px     yes
+attic ventilation              294px     509px     yes
+deck joist span (pre-existing) 294px     314px     yes
+```
+
+Confirmed visually at a 320px viewport as well: the caption wraps, the table scrolls inside
+its box with a visible scrollbar track, and the note below it wraps cleanly.
+
+One usability nit, not a defect and not fixed: a horizontally scrollable table has no
+affordance beyond the scrollbar itself, and mobile browsers draw overlay scrollbars that
+appear only during a scroll. A reader on a phone may not realise columns three and four
+exist. A fade or a "scroll for more" hint on `.table-scroll` would fix it if Alka thinks it
+is worth doing.
 
 Some counts in this document moved for reasons unrelated to any defect: URLs 23 → 22 when
 the empty `electrical` and `hvac` category pages were dropped from the sitemap, and
