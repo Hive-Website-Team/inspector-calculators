@@ -132,7 +132,16 @@ export const record: CalculatorRecord = {
       inputs: { peakHourDemand: 60, labelledFhr: 62 },
     },
   ],
-  related: ['cost-per-inspection-calculator'],
+  /*
+    Deliberately empty. This is the only plumbing calculator, and the previous
+    entry pointed at Cost Per Inspection — a pricing tool with no relationship
+    to sizing a water heater beyond both living on this site. A "related"
+    module that links unrelated things trains a reader to ignore it and tells a
+    crawler the two pages belong to one topic when they do not. The block still
+    renders the "All plumbing calculators" link, so the page keeps its
+    contextual outbound link. Fill this in when plumbing has a second entry.
+  */
+  related: [],
   datePublished: '2026-09-07',
   dateModified: '2026-09-07',
 };

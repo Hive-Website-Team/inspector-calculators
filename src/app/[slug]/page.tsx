@@ -70,6 +70,44 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
     datePublished: record.datePublished,
   };
 
+  /*
+    The editorial layer, described.
+
+    `WebApplication` above describes the tool: what it computes, that it is
+    free, that it runs without JavaScript. Nothing described the writing around
+    it — the formula, what the result means, the limitations, and above all the
+    sources — even though that is the half the site stakes its credibility on
+    and the half an answer engine quotes.
+
+    `citation` is the reason this node earns its place: it turns the sources
+    table into a machine-readable list of the primary authorities behind the
+    page, which is precisely the claim the build gate exists to enforce.
+    Derived sources carry no URL and are emitted as a named work without one.
+  */
+  const techArticleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    '@id': `${url}#article`,
+    headline: record.title,
+    description: record.summary,
+    abstract: record.definition,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    // The article is *about* the calculator; both resolve to one entity.
+    about: { '@id': ids.calculator(record.slug) },
+    isPartOf: { '@id': ids.website },
+    publisher: { '@id': ids.organization },
+    author: { '@id': ids.organization },
+    inLanguage: 'en-US',
+    articleSection: categoryLabel(record.category),
+    datePublished: record.datePublished,
+    dateModified: record.dateModified,
+    citation: record.assumptions.map((a) => ({
+      '@type': 'CreativeWork',
+      name: a.source.citation,
+      ...(a.source.url ? { url: a.source.url } : {}),
+    })),
+  };
+
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -83,6 +121,18 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
   const relatedCalculators = record.related
     .map((relatedSlug) => getCalculator(relatedSlug))
     .filter((m): m is NonNullable<typeof m> => Boolean(m));
+
+  /*
+    The heading used to call every related calculator a "similar <this page's
+    category>" calculator, which was only true when the relation happened to
+    stay inside the category. On a pricing page pointing at a business
+    calculator it mislabelled the destination, and to a crawler reading anchor
+    context it asserted a category the target does not belong to. Claim the
+    category only when every entry actually shares it.
+  */
+  const relatedShareCategory =
+    relatedCalculators.length > 0 &&
+    relatedCalculators.every((m) => m.record.category === record.category);
 
   /*
     The reference's table of contents: one anchor per H2 on the page, in the
@@ -102,6 +152,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
   return (
     <div className="calc-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(techArticleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <div className="calc-page-inner">
@@ -140,12 +191,25 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
           <aside className="calc-side">
             <div className="calc-side-sticky">
               <CalculatorWidget slug={record.slug} />
-              {relatedCalculators.length > 0 && (
-                <div className="calc-similar">
+              {/* Always rendered. The block used to be hidden entirely when a
+                  calculator had no siblings, which cost the page its only
+                  contextual internal link on exactly the pages that needed one
+                  most — the sole calculator in a category. */}
+              <div className="calc-similar">
                   <p className="calc-similar-head">
-                    Check out <strong>{relatedCalculators.length} similar</strong>{' '}
-                    {categoryLabel(record.category).toLowerCase()} calculator
-                    {relatedCalculators.length === 1 ? '' : 's'}
+                    {relatedCalculators.length > 0 ? (
+                      <>
+                        {/* The noun is emitted whole rather than as
+                            "calculator" + "s". React separates adjacent text
+                            nodes with a comment marker, and this file already
+                            treats raw-HTML parsers as a real audience. */}
+                        Check out <strong>{relatedCalculators.length} related</strong>{' '}
+                        {relatedShareCategory ? `${categoryLabel(record.category).toLowerCase()} ` : ''}
+                        {relatedCalculators.length === 1 ? 'calculator' : 'calculators'}
+                      </>
+                    ) : (
+                      <>Keep going</>
+                    )}
                   </p>
                   <ul>
                     {relatedCalculators.map((m) => (
@@ -187,8 +251,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ slu
                       </a>
                     </li>
                   </ul>
-                </div>
-              )}
+              </div>
             </div>
           </aside>
 
