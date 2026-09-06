@@ -1,6 +1,6 @@
 # Task 1 — Inspector Calculators: status
 
-**Site 1 of 3** · Branch `task-1-calculators` · Written 2026-09-04
+**Site 1 of 3** · Branch `task-1-calculators` · Written 2026-09-04 · Updated 2026-09-07
 
 Nothing is deployed. Nothing is merged to `main`. Per `tasks/README.md` §7, the work
 sits on a branch and Alka merges and deploys.
@@ -10,13 +10,14 @@ sits on a branch and Alka merges and deploys.
 ## 1. Where things stand in one line
 
 The build is complete and every check that can run without a live domain passes.
-Five decisions and the deployment itself are Alka's.
+An SEO review on 2026-09-07 found eight defects; all eight are fixed (`83622d4`,
+`9bfdd6d`). Six decisions and the deployment itself are Alka's.
 
 ---
 
 ## 2. What was built
 
-### 11 calculators
+### 12 calculators
 
 Every calculator is a validated TypeScript record with a pure `compute()` function. The
 page renders from the record; prose is secondary.
@@ -44,6 +45,30 @@ launch list plus Home Inspection Software Pricing, with §6 #10 restored (see se
 `/` · `/methodology` · `/about` · `/changelog` · eight `/category/<name>` pages · one
 root-level page per calculator (`/attic-ventilation-calculator`, not `/tools/...`).
 
+### Structured data
+
+Reviewed and rebuilt 2026-09-07. Every node is server-rendered; nothing depends on
+JavaScript running.
+
+| Page type | JSON-LD blocks | Nodes |
+|---|---|---|
+| `/` | 2 | Organization · WebSite · **CollectionPage → ItemList of all 12** |
+| `/category/<name>` | 3 | Organization · WebSite · BreadcrumbList · **CollectionPage → ItemList** |
+| `/<slug>` | 4 | Organization · WebSite · WebApplication · **TechArticle** · BreadcrumbList |
+
+Two things make this more than a pile of nodes:
+
+- **One entity per calculator.** `ids.calculator(slug)` gives each one a stable `@id`.
+  The calculator's own page declares it in full; the home and category ItemLists
+  reference the same `@id`. A consumer resolves them to one node instead of to a full
+  record plus a near-duplicate stub. This follows the `@id` discipline already in
+  `src/lib/site.ts`, where duplicate inline Organization nodes were a real P0 on a
+  sibling site.
+- **`TechArticle.citation`.** `WebApplication` describes the tool; `TechArticle`
+  describes the writing around it, and its `citation` array turns the sources table into
+  a machine-readable list of the primary authorities behind the page. That is the exact
+  claim the build gate exists to enforce, stated in the layer an answer engine reads.
+
 ### Infrastructure
 
 - **Build gate** (`scripts/check-content.mjs`) — validates every record against the Zod
@@ -53,6 +78,13 @@ root-level page per calculator (`/attic-ventilation-calculator`, not `/tools/...
 - **Source check** (`scripts/check-sources.mjs`) — *new.* `TASK-1` §9 required this and it
   did not exist. Curls every source URL and fails on anything that is not reachable.
   Sites that refuse bots come back as MANUAL, not FAIL.
+- **Table check** (`scripts/check-tables.mts`) — *added 2026-09-07.* Reference tables are
+  hand-written strings; the calculators are code, and nothing stopped the two drifting. A
+  table that quietly disagrees with the tool beside it is the worst defect this site could
+  carry, so every cell of every derived table is recomputed from that calculator's own
+  `compute()` and compared exactly. Runs in `npm run build` ahead of `next build`. Code
+  tables (IRC limits, DCA 6-15 spans) are transcriptions rather than outputs, so they stay
+  covered by the sourced-assumption gate and `check:sources` instead.
 - `robots.ts` — 25 AI crawlers + 6 search crawlers, each an explicit allow group.
 - `sitemap.ts` — per-page `dateModified`, never `new Date()`.
 
@@ -66,7 +98,7 @@ and ignore the task file's design guidance. Three page types were matched:
 |---|---|
 | Home | Soft multi-colour hero wash, count headline in the accent blue, pill search, broken blue/red/yellow rings cropped by the section edges, white category-tile panel lifted over the wash, card grid, tagline footer |
 | `/category/<name>` | Wordmark-left header with a search pill and a category tab row, blue icon badge beside the H1, calculator count, intro paragraph, two-column list |
-| `/<slug>` | "Last updated" line above the H1, table of contents, prose column with the tool in a sticky right rail, "Check out N similar" card |
+| `/<slug>` | "Last updated" line above the H1, table of contents, prose column with the tool in a sticky right rail, "Check out N related" card |
 
 Deviations from the task file, all on the owner's instruction:
 
@@ -86,38 +118,109 @@ and the methodology pattern — formula, assumptions table, code edition, source
 
 All run against a production build.
 
-Re-run 2026-09-07 after the design rebuild.
+Re-run 2026-09-07 after the design rebuild, and again after the SEO fixes below.
+
+**Re-run 2026-09-07 after the SEO fixes** — these numbers are current:
 
 ```
-Content check passed — 11 calculators, every one carries a sourced assumption
-SSR check passed     — 23 URLs, all resolve with server-rendered schema
+Content check passed — 12 calculators, every one carries a sourced assumption
+Table check passed   — every derived reference-table cell reproduces from compute()
+SSR check passed     — 22 URLs, all resolve with server-rendered schema
 Source check passed  — 10 of 10 source URLs return 200
+JS disabled          — 12/12 calculators render every result in server HTML (54 values)
+TOC anchors          — 81/81 anchors across 12 pages resolve to an h2 on the page
+```
+
+**Carried over from the design rebuild, not re-run since the content work:**
+
+```
 Lighthouse mobile    — Accessibility 100 · Best Practices 100 · SEO 100 on every page type;
                        Performance 92-97 across runs
-JS disabled          — 11/11 calculators show every computed result (49 values)
 Shareable URLs       — 11/11 restore their inputs and keep the querystring
-TOC anchors          — 11/11 pages: every anchor resolves to an h2 on the page
 Mobile               — 60 page-loads at 320/360/390/768/1024px, no horizontal scroll
 ```
+
+The four expanded pages each gained a reference table, the widest being four columns. Every
+table on a calculator page renders inside a `.table-scroll` wrapper carrying
+`overflow-x: auto` (`src/app/globals.css:183`), verified present on both tables of each
+page, so a wide table scrolls within its own box rather than pushing the document. That is
+the structural guarantee; **a visual mobile pass and a fresh Lighthouse run are still the
+two worth repeating** before launch, since neither has been re-run since the pages grew.
+
+Some counts in this document moved for reasons unrelated to any defect: URLs 23 → 22 when
+the empty `electrical` and `hvac` category pages were dropped from the sitemap, and
+calculators 11 → 12 with results 49 → 54 when Water Heater Sizing was restored (section 4).
 
 Three defects were found and fixed during that re-run, all introduced by the rebuild:
 the header CTA rendered dark-on-blue at 3.11:1 because `.site-header-nav a` outranked it
 on specificity; the inner-page header overflowed the viewport at 360px and 390px; and on
 a phone the calculator sat below the entire article instead of directly under the H1.
 
-**Build gate proven both ways.** Removing the source from one assumption:
+**Both gates proven in the failing direction, not just the passing one.**
+Removing the source from one assumption:
 
 ```
-Content check FAILED — 1 problem(s) in 11 calculator(s):
+Content check FAILED — 1 problem(s) in 12 calculator(s):
   ✗ attic-ventilation-calculator
     assumptions.0.source: Invalid input: expected object, received undefined
 ```
 
-Restored:
+Changing one reference-table cell from 10.00 to 11.00 sq ft:
 
 ```
-Content check passed — 11 calculator(s), every one carries a sourced assumption.
+MISMATCH attic 1500@1:150: table says 11.00 sq ft (1,440 sq in), compute says 10.00 sq ft
+Table check FAILED — 1 cell(s) do not match compute().
 ```
+
+`npm run build` exits 1 in both cases and 0 once restored.
+
+### Uniqueness — measured, not assumed
+
+This had never been checked. Measured 2026-09-07 by 8-word shingle overlap across all 66
+pairs of calculator pages, and by sentence-level comparison against the sibling sites.
+
+```
+Worst pair, before the content work   11.3%   cost-per-inspection vs startup-cost-planner
+Worst pair, after                      8.6%   guard-handrail vs stair-rise-run
+Median pair, before / after       6.7% / 5.1%
+Sitewide boilerplate               10–16% of any given page
+vs inspector-stack /about              0 shared sentences over 60 characters
+vs inspector-stack /methodology        0 shared sentences over 60 characters
+```
+
+Template-driven calculator sites usually land at 40–70% and get treated as near-duplicates.
+This one does not, because the prose fields are genuinely written per calculator. Note the
+figures fell rather than rose after four pages roughly doubled in length — that is the test
+that the added prose is real content and not padding.
+
+### SEO review 2026-09-07 — eight defects, all fixed
+
+Reviewed against the running build rather than from memory. Commits `83622d4` and
+`9bfdd6d`.
+
+| | Defect | Fix |
+|---|---|---|
+| 1 | No `ItemList`/`CollectionPage` anywhere. Home and category pages carried only Organization, WebSite and a breadcrumb — nothing enumerated what a listing page lists, on a site whose entire job is enumeration. | `collectionPageSchema()` in `src/lib/site.ts`, wired into both page types |
+| 2 | Citation links carried `rel="nofollow"` — the site's premise is primary-source attribution, and it was telling Google not to follow the IRC, eCFR, AWC and IRS pages the build gate exists to enforce. `nofollow` signals untrusted or paid. | Removed; links keep `noopener noreferrer` |
+| 3 | Four pages were thin. Stripped of boilerplate, attic ventilation carried 153 words of its own. | Reference table plus longer interpretation and limitations on each; see below |
+| 4 | `CONTENT_LAST_REVIEWED` stale at 2026-09-03 after the 09-07 rebuild, so four static pages under-reported freshness in the sitemap. | Bumped to 2026-09-07 |
+| 5 | `related` claimed a category it did not own — the heading read "similar *&lt;this page's&gt;* calculator" even when the target sat elsewhere. Water Heater Sizing linked to Cost Per Inspection, a relation that existed only to stop the module disappearing. | Category claimed only when every entry shares it; the invented relation removed |
+| 6 | The related block was hidden entirely when a calculator had no siblings, costing the page its only contextual internal link on exactly the pages that had fewest. | Always renders; keeps the "All &lt;category&gt; calculators" link |
+| 7 | Nothing described the prose layer. `WebApplication` covered the tool, not the writing the site stakes its credibility on. | `TechArticle` with `citation` and `about` |
+| 8 | `/opengraph-image` on the Edge runtime, deprecated in Next 16.3 and warned on every build. | Moved to the Node runtime |
+
+**The thin pages, before and after:**
+
+```
+attic ventilation      399 → 791 words
+cost per inspection    455 → 775
+software TCO           510 → 841
+startup cost planner   518 → 855
+```
+
+The added tables are **derived arithmetic, not new claims** — no source was invented to
+fill space. Every cell was produced by the calculator's own `compute()` rather than typed,
+and `check:tables` now keeps it that way.
 
 ### Numbers checked against the primary source, not from memory
 
@@ -139,8 +242,11 @@ HowTo schema          0
 Accordions / <details> 0
 images.unoptimized    absent
 new Date() in sitemap absent
+rel="nofollow"        0 sitewide  <-- removed 2026-09-07; see SEO review defect 2
+Edge runtime          0 routes    <-- deprecated in Next 16.3
 Hive links            0 sitewide  <-- deliberate, owner-confirmed 2026-09-07; supersedes §9
 Bare "Disallow: /"    0 under GPTBot, ClaudeBot, OAI-SearchBot
+h1 per page           exactly 1 on all six page types
 ```
 
 ### Known deviations from the task file
@@ -157,7 +263,7 @@ Bare "Disallow: /"    0 under GPTBot, ClaudeBot, OAI-SearchBot
    why the site exists, how code figures and vendor prices are verified, and how
    corrections are handled, and the site carries a corrections address
    (`corrections@inspectorcalculators.com`) on `/about`, `/methodology`, the footer and
-   in the Organization schema's `contactPoint`. **The mailbox still needs creating.**
+   in the Organization schema's `contactPoint`. **The mailbox still needs creating — now tracked as section 5 decision 7 and a launch-day task.**
 
 2. **Light theme only** — see the Design section above.
 
@@ -230,8 +336,32 @@ while empty. `electrical` and `hvac` remain empty and remain dropped.
    schema for pure-arithmetic calculators, or leave the citation as-is. The schema change
    touches the build gate, so it needs your sign-off.
 
-5. **Repo.** Currently at `~/websites/inspector-calculators`, public on GitHub under
-   MohammedHive. Confirm that's where you want it, or say where to move it.
+5. **Repo.** Currently at `~/inspector-calculators` locally, pushed to
+   `github.com/Hive-Website-Team/inspector-calculators`. (An earlier draft of this doc
+   said `~/websites/...` under MohammedHive; both were wrong — corrected 2026-09-07
+   against `git remote -v`.) Confirm that's where you want it, or say where to move it.
+
+6. **Which site owns the software-pricing query — this one or `inspector-stack`?**
+   Raised by the 2026-09-07 review and left deliberately unfixed, because it is a
+   positioning call rather than a defect. Four calculators here cite Spectora, ISN and
+   Palm-Tech pricing, and `inspector-stack` is a software-comparison site built on the
+   same vendors. `home-inspection-software-pricing-calculator` will compete with its own
+   sibling for the same searches.
+
+   To be clear about what this is and is not: there is **no duplicated text** — sentence
+   comparison against `inspector-stack`'s `/about` and `/methodology` found zero shared
+   sentences. This is intent overlap, so the fix is a decision about which site should
+   rank, not a content edit. Options are to keep the calculator here and have
+   `inspector-stack` link to it as the tool, keep the editorial comparison there and thin
+   this one to arithmetic only, or accept the overlap. I have no stake in which; it just
+   should not be decided by accident after both sites are indexed.
+
+7. **The corrections mailbox.** `corrections@inspectorcalculators.com` is published on
+   `/about`, on `/methodology`, in the footer and inside the Organization schema's
+   `contactPoint`. **It does not exist yet, so mail to it bounces.** This is a
+   credibility claim the site makes four times over; it needs to be real before the
+   domain goes live. Listed here rather than only in section 3 because it is a
+   launch blocker, not a note.
 
 ### Launch-day tasks that need the live domain
 
@@ -244,6 +374,8 @@ while empty. `electrical` and `hvac` remain empty and remain dropped.
 | ☐ | Google Search Console + Bing Webmaster, submit sitemap |
 | ☐ | Copy and run `indexnow-submit.mjs` from `estategpt-website` |
 | ☐ | Baseline AI prompt set — 15 prompts across ChatGPT, Perplexity, Google AI Mode, screenshots to `docs/baseline/2026-MM-DD/` |
+| ☐ | **Create the `corrections@` mailbox** — published in four places, currently bounces |
+| ☐ | Rich Results Test on `/` and one `/category/` page too, not just a calculator — the `ItemList` nodes are new and have never been validated against a live URL |
 
 The check that matters most, run it before anything else:
 
@@ -266,15 +398,29 @@ appears, the domain is behind Cloudflare Managed robots.txt — stop and fix tha
   omits inspection duration, so the build follows the spec — the spec is what's off. Say the
   word and I'll add an on-site hours input and compute from profit.
 - **`grep -c 'application/ld+json'` in §4 cannot pass as written.** `grep -c` counts lines,
-  and Next.js minifies the page onto one, so it returns 1 regardless. The real count is 3
-  blocks. Suggest amending the task file to `grep -o … | wc -l`.
+  and Next.js minifies the page onto one, so it returns 1 regardless. Suggest amending the
+  task file to `grep -o '<script type="application/ld+json">' … | wc -l`. The real counts
+  after the 2026-09-07 schema work are **2 on `/`, 3 on a category page, 4 on a calculator
+  page** (was 3 on a calculator page before `TechArticle`). Match on the opening tag, not
+  the bare string — the RSC payload repeats it, so a loose grep against `next dev` doubles
+  every count.
 - **The §3 gate spec says source URLs must be "unique."** `spectora.com/pricing/` is cited
   by four calculators. Reusing one vendor's pricing page across four tools looks correct to
   me, so the gate allows it — flagging in case you read that requirement literally.
 - **`gray-matter`** is installed per §2 but unused. Harmless.
-- **Two category pages are empty.** `/category/electrical` and `/category/hvac` have no
-  calculators yet. §5 asks for all eight, so all eight ship, and they will fill from the
-  §10 after-launch list.
+- **Only six of the eight categories exist — a real deviation from §5.** `electrical` and
+  `hvac` have no calculators, and `generateStaticParams` filters them out with
+  `dynamicParams = false`, so `/category/electrical` and `/category/hvac` return **404**.
+  They are absent from the sitemap and unlinked from the header, footer and home grid.
+
+  This corrects an earlier line in this document which said all eight ship and that the
+  empty two render a "nothing here yet" message. They do not; the empty-state branch in
+  `src/app/category/[name]/page.tsx` is currently unreachable and is kept only so the
+  pages come back automatically the moment a calculator claims either category.
+
+  §5 asks for all eight. Shipping a 404 is the better trade than shipping two empty pages
+  into a first crawl, but it *is* a deviation and should be either accepted in writing or
+  closed by building one electrical and one HVAC calculator from the §10 list.
 
 ---
 
