@@ -45,6 +45,13 @@ export const calculatorSchema = z.object({
     default: z.number(), min: z.number(), max: z.number(), step: z.number().optional(),
     help: z.string().optional(),
     /*
+      A heading rendered immediately above this field, splitting a long form
+      into readable groups. Set on the first input of the group only; every
+      later input belongs to the same group until the next one carries a
+      `section` of its own.
+    */
+    section: z.string().optional(),
+    /*
       A fixed set of choices — rendered as a <select> rather than a number box.
 
       The values stay numeric on purpose. Everything downstream of an input is
@@ -54,7 +61,28 @@ export const calculatorSchema = z.object({
       need all three reworked to gain nothing a lookup key cannot do.
     */
     options: z.array(z.object({ value: z.number(), label: z.string() })).min(2).optional(),
+    /*
+      Several of a fixed set at once — rendered as a checkbox group rather than
+      a <select>. "Which vendors am I comparing?" is a set, not a choice, and a
+      single-value picker cannot express it.
+
+      The set is held in one number as a bitmask, so every option value is a
+      distinct power of two and the input stays a number like every other:
+      the querystring sync still shares it (?vendors=27), the clamp still
+      guards a hand-edited link, and compute() keeps its Record<string, number>
+      signature. min/max bound the mask, so max must be at least the sum of
+      every bit or a full selection would be clamped down to a partial one.
+    */
+    choices: z.array(z.object({ value: z.number().int().positive(), label: z.string() })).min(2).optional(),
   })
+    .refine((i) => !(i.options && i.choices),
+      'an input is either a single choice (options) or a set of them (choices), not both')
+    .refine((i) => !i.choices || i.choices.every((c) => (c.value & (c.value - 1)) === 0),
+      'every choice value must be a power of two — the selection is stored as a bitmask')
+    .refine((i) => !i.choices || new Set(i.choices.map((c) => c.value)).size === i.choices.length,
+      'two choices share a bit, so they could never be ticked independently')
+    .refine((i) => !i.choices || i.max >= i.choices.reduce((sum, c) => sum + c.value, 0),
+      'max must cover every bit at once, or ticking them all would clamp the selection')
     .refine((i) => !i.options || i.options.some((o) => o.value === i.default),
       'default must be one of the declared options')
     /*

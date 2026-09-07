@@ -18,7 +18,12 @@ import type { ResultTable } from './index';
   per-inspection plan does not move with headcount, and the two curves cross.
 */
 interface Vendor {
-  id: number;
+  /*
+    A distinct power of two. The vendors a reader wants priced is a set, not a
+    choice, so the selection is a bitmask over these — see `choices` in the
+    input schema. Ids used to be 1,2,3…; they are 1,2,4… now for that reason.
+  */
+  bit: number;
   name: string;
   /* How the vendor charges, in four or five words. Shown under the name. */
   model: string;
@@ -75,35 +80,35 @@ function tapInspectMonthly(n: number, k: number): number {
 
 const VENDORS: Vendor[] = [
   {
-    id: 1,
+    bit: 1,
     name: 'Hive Inspect',
     model: 'Flat, per inspector',
     monthly: (_n, k) => 99 + 69 * Math.max(k - 1, 0),
     annual: (_n, k) => 999 + 599 * Math.max(k - 1, 0),
   },
   {
-    id: 2,
+    bit: 2,
     name: 'Spectora',
     model: 'Flat, per inspector',
     monthly: (_n, k) => 109 + 99 * Math.max(k - 1, 0),
     annual: (_n, k) => 1090 + 999 * Math.max(k - 1, 0),
   },
   {
-    id: 3,
+    bit: 4,
     name: 'Spectora + Advanced',
     model: 'Flat plan plus $4/inspection',
     monthly: (n, k) => 109 + 99 * Math.max(k - 1, 0) + 4 * n,
     annual: (n, k) => 1090 + 999 * Math.max(k - 1, 0) + 4 * n * 12,
   },
   {
-    id: 4,
+    bit: 8,
     name: 'ISN',
     model: 'Tiered per inspection',
     monthly: (n) => isnMonthly(n),
     annual: (n) => isnMonthly(n) * 12,
   },
   {
-    id: 5,
+    bit: 16,
     name: 'HomeGauge',
     model: 'Flat monthly',
     monthly: () => 89,
@@ -111,14 +116,14 @@ const VENDORS: Vendor[] = [
     seatCaveat: 'no published multi-inspector rate',
   },
   {
-    id: 6,
+    bit: 32,
     name: 'Palm-Tech',
     model: 'Per user',
     monthly: (_n, k) => 50 * k,
     annual: (_n, k) => 500 * k,
   },
   {
-    id: 7,
+    bit: 64,
     name: 'Tap Inspect',
     model: 'Unlimited or per inspection',
     monthly: (n, k) => tapInspectMonthly(n, k),
@@ -126,11 +131,26 @@ const VENDORS: Vendor[] = [
   },
 ];
 
-const CUSTOM_VENDOR_ID = 8;
+/* The one row that is not a published price: whatever the reader is paying now. */
+const CUSTOM_BIT = 128;
 
-const vendorOptions = [
-  ...VENDORS.map((v) => ({ value: v.id, label: v.name })),
-  { value: CUSTOM_VENDOR_ID, label: 'Other / my own figure' },
+/* Every bit at once — the ceiling the clamp is given. */
+const ALL_BITS = VENDORS.reduce((sum, v) => sum + v.bit, 0) + CUSTOM_BIT;
+
+/*
+  What is ticked before anyone touches anything: Hive Inspect, Spectora and
+  HomeGauge.
+
+  Three, not all seven, because each product is a column now. Three columns and
+  a label column fill the tool's width exactly; seven would open on a table that
+  has to be scrolled sideways before it can be read, which is a poor first
+  impression of a comparison. The other four are one tick away.
+*/
+const DEFAULT_VENDORS = 1 + 2 + 16;
+
+const vendorChoices = [
+  ...VENDORS.map((v) => ({ value: v.bit, label: v.name })),
+  { value: CUSTOM_BIT, label: 'What I pay now (enter it below)' },
 ];
 
 export const record: CalculatorRecord = {
@@ -138,17 +158,25 @@ export const record: CalculatorRecord = {
   title: 'Home Inspection Software Cost Calculator',
   category: 'pricing',
   definition:
-    'The home inspection software cost calculator prices Hive Inspect, Spectora, ISN, HomeGauge, Palm-Tech and Tap Inspect against your own monthly inspection count and inspector headcount, then adds the rest of your stack into one monthly and annual total.',
+    'The home inspection software cost calculator prices Hive Inspect, Spectora, ISN, HomeGauge, Palm-Tech and Tap Inspect side by side at your own monthly inspection count and inspector headcount, reporting what each one bills per month and per year.',
   inputs: [
     {
-      key: 'vendor',
-      label: 'Report software',
-      default: 2,
+      key: 'vendors',
+      label: 'Software to compare',
+      section: 'Compare',
+      default: DEFAULT_VENDORS,
+      /*
+        A mask, not a count. `min: 1` is the floor a hand-edited link is
+        clamped to — the widget itself refuses to untick the last box, so the
+        floor is only ever reached by someone editing ?vendors= by hand.
+      */
       min: 1,
-      max: 8,
-      options: vendorOptions,
-      help: 'Every vendor is priced side by side in the table below, whichever one you pick here',
+      max: ALL_BITS,
+      choices: vendorChoices,
+      help: 'Tick as many as you want priced. Each one gets its own column below, cheapest on the left — scroll the table sideways past three.',
     },
+    { key: 'inspectionsPerMonth', label: 'Inspections per month', default: 20, min: 1, max: 300 },
+    { key: 'inspectors', label: 'Inspectors needing a login', default: 1, min: 1, max: 25, help: 'Seat count, including the owner' },
     {
       key: 'billing',
       label: 'Billing',
@@ -161,10 +189,17 @@ export const record: CalculatorRecord = {
       ],
       help: 'Annual prepay is only cheaper where the vendor publishes an annual plan',
     },
-    { key: 'inspectionsPerMonth', label: 'Inspections per month', default: 20, min: 1, max: 300 },
-    { key: 'inspectors', label: 'Inspectors needing a login', default: 1, min: 1, max: 25, help: 'Seat count, including the owner' },
-    { key: 'customSoftware', label: 'Your own figure', unit: '$/mo', default: 0, min: 0, max: 2000, help: "Used only when Report software is set to 'Other / my own figure'" },
-    { key: 'scheduling', label: 'Scheduling tool', unit: '$/mo', default: 0, min: 0, max: 500, help: '0 if bundled into report software' },
+    { key: 'customSoftware', label: 'What I pay now', unit: '$/mo', default: 0, min: 0, max: 2000, help: "Priced as its own row when 'What I pay now' is ticked above" },
+    {
+      key: 'scheduling',
+      label: 'Scheduling tool',
+      unit: '$/mo',
+      section: 'The rest of your stack — optional, and the same whichever vendor wins',
+      default: 0,
+      min: 0,
+      max: 500,
+      help: '0 if bundled into report software',
+    },
     { key: 'crm', label: 'CRM', unit: '$/mo', default: 0, min: 0, max: 500 },
     { key: 'paymentsPercent', label: 'Payment processing fee', unit: '%', default: 3, min: 0, max: 10, help: 'Percent of card-processed revenue' },
     { key: 'monthlyRevenue', label: 'Monthly revenue processed via card', unit: '$/mo', default: 8000, min: 0, max: 200000 },
@@ -173,56 +208,58 @@ export const record: CalculatorRecord = {
     { key: 'ai', label: 'AI tools', unit: '$/mo', default: 0, min: 0, max: 500 },
   ],
   outputs: [
-    { key: 'softwareMonthly', label: 'Selected software, per month', unit: '$/mo' },
-    { key: 'softwareAnnual', label: 'Selected software, per year', unit: '$/yr' },
-    { key: 'monthlyTotal', label: 'Whole stack, per month', unit: '$/mo' },
-    { key: 'trueAnnualSoftwareSpend', label: 'True annual software spend', unit: '$/yr' },
-    { key: 'perInspectionSoftwareCost', label: 'Software cost per inspection', unit: '$' },
+    { key: 'cheapest', label: 'Cheapest of the ones you ticked' },
+    { key: 'cheapestMonthly', label: 'That one, per month', unit: '$/mo' },
+    { key: 'cheapestAnnual', label: 'That one, per year', unit: '$/yr' },
+    { key: 'dearest', label: 'Dearest of the ones you ticked' },
+    { key: 'annualDifference', label: 'A year between cheapest and dearest', unit: '$/yr' },
+    { key: 'addOnsMonthly', label: 'The rest of your stack, per month', unit: '$/mo' },
+    { key: 'cheapestStackAnnual', label: 'Cheapest option plus that stack, per year', unit: '$/yr' },
   ],
   summary:
-    'Price Hive Inspect, Spectora, ISN, HomeGauge and more at your real volume, then total your whole software stack monthly and annually.',
+    'Compare Hive Inspect, Spectora, ISN, HomeGauge, Palm-Tech and Tap Inspect side by side — monthly and annual price for each, at your own volume.',
 
   formulaText:
-    "Each vendor's bill is worked out from its own published model at your inspection count and inspector count: a flat plan charges a base price plus a rate for each additional inspector; a per-inspection plan applies its rate, or its volume tiers, to your monthly count; a per-user plan multiplies by seats. Monthly stack total = selected software + scheduling + CRM + (payment fee % × monthly revenue) + website + phone + AI. True annual software spend = monthly stack total × 12. Software cost per inspection = monthly stack total ÷ inspections per month.",
+    "Tick the products you want priced and each one is billed by its own published model at your inspection count and inspector count: a flat plan charges a base price plus a rate for each additional inspector; a per-inspection plan applies its rate, or its volume tiers, to your monthly count; a per-user plan multiplies by seats. Every ticked product gets a column — per month, per year, and per inspection — ordered cheapest first. Per year = the annual plan when you prepay, otherwise twelve monthly bills. Per inspection = that vendor's monthly bill ÷ inspections per month. The rest of your stack — scheduling, CRM, payment fee % × monthly revenue, website, phone, AI — is added separately, because it costs the same whichever vendor you pick.",
 
   interpretation:
-    'Read the comparison table before the total. The vendors do not merely differ in price, they differ in what the price is attached to, and that is what decides which one is cheapest for you rather than in general. Flat per-inspector plans — Hive Inspect, Spectora, HomeGauge, Palm-Tech — cost the same in a dead February as in a frantic June, so their cost per inspection falls as you get busier and they reward volume. Per-inspection pricing does the opposite: ISN and Tap Inspect\'s pay-as-you-go are close to free on a slow month and become the most expensive line in the stack on a good one, which is exactly why they suit a new or part-time inspector and stop suiting a full book. Spectora Advanced sits in both camps, a flat plan with a $4-per-inspection meter bolted on, so it tracks volume even though it looks like a subscription. The practical consequence is that the ranking in the table flips as you grow, usually somewhere between fifteen and twenty-five inspections a month, and a plan chosen in your first year is very often the wrong one by your third. Check the ranking again whenever your volume moves by half, and take the per-inspection figure — not the monthly one — into your pricing, because that is the number that sits alongside vehicle and insurance in your cost per inspection. Two things the table cannot tell you: annual prepay only helps where a vendor publishes an annual plan, and a stack running above roughly 5% of revenue is usually carrying two tools that overlap rather than one that is overpriced.',
+    'Read the table before the boxes above it. The products do not merely differ in price, they differ in what the price is attached to, and that is what decides which one is cheapest for you rather than in general. Flat per-inspector plans — Hive Inspect, Spectora, HomeGauge, Palm-Tech — cost the same in a dead February as in a frantic June, so their cost per inspection falls as you get busier and they reward volume. Per-inspection pricing does the opposite: ISN and Tap Inspect\'s pay-as-you-go are close to free on a slow month and become the most expensive line in the stack on a good one, which is exactly why they suit a new or part-time inspector and stop suiting a full book. Spectora Advanced sits in both camps, a flat plan with a $4-per-inspection meter bolted on, so it tracks volume even though it looks like a subscription. The practical consequence is that the order of the columns flips as you grow, usually somewhere between fifteen and twenty-five inspections a month, and a plan chosen in your first year is very often the wrong one by your third. Check the ranking again whenever your volume moves by half, and take the per-inspection figure — not the monthly one — into your pricing, because that is the number that sits alongside vehicle and insurance in your cost per inspection. Two things the table cannot tell you: annual prepay only helps where a vendor publishes an annual plan, and a stack running above roughly 5% of revenue is usually carrying two tools that overlap rather than one that is overpriced.',
   assumptions: [
     {
       text: 'Hive Inspect: $99 per inspector per month, or $999 per inspector per year; additional inspectors $69 per month, or $599 per year.',
-      source: { citation: 'Hive Inspect — Pricing', url: 'https://hiveinspect.com/pricing', accessed: '2026-09-07' },
+      source: { citation: 'Hive Inspect — Pricing', url: 'https://hiveinspect.com/pricing', accessed: '2026-09-08' },
     },
     {
       text: 'Spectora: $109 per month or $1,090 per year for the base plan; additional inspectors $99 per month or $999 per year.',
-      source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-07' },
+      source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-08' },
     },
     {
       text: 'Spectora Advanced is an add-on billed at $4 per inspection on top of the base plan, not a replacement for it, so the "Spectora + Advanced" row carries both charges.',
-      source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-07' },
+      source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-08' },
     },
     {
       text: 'ISN: $7.25 per inspection for the first 50 each month, $5.50 for inspections 51 to 100, and $3.75 for 101 to 150. ISN charges no separate seat fee, so the ISN row does not move with inspector count.',
-      source: { citation: 'Inspection Support Network — Pricing', url: 'https://www.inspectionsupport.com/pricing/', accessed: '2026-09-07' },
+      source: { citation: 'Inspection Support Network — Pricing', url: 'https://www.inspectionsupport.com/pricing/', accessed: '2026-09-08' },
     },
     {
       text: "ISN's monthly minimum is $10. The pricing page only warns that \"monthly minimum fees may apply\" without naming a figure; the amount appears in ISN's help centre, in the article listing what an ISN–Porch partnership waives, as \"ISN's $10 monthly minimum fee\". The floor is applied here, so it only changes the bill at one inspection a month — two inspections already bill $14.50.",
-      source: { citation: 'Inspection Support Network — Help Centre, Porch Benefits and Customization', url: 'https://help.inspectionsupport.com/en/articles/1393156-porch-benefits-and-customization', accessed: '2026-09-07' },
+      source: { citation: 'Inspection Support Network — Help Centre, Porch Benefits and Customization', url: 'https://help.inspectionsupport.com/en/articles/1393156-porch-benefits-and-customization', accessed: '2026-09-08' },
     },
     {
       text: 'HomeGauge: $89 per month after a 30-day free trial. HomeGauge publishes no additional-inspector rate, so the HomeGauge row is held flat across seat counts rather than guessed at.',
-      source: { citation: 'HomeGauge — Software Pricing', url: 'https://www.homegauge.com/one/pricing/', accessed: '2026-09-07' },
+      source: { citation: 'HomeGauge — Software Pricing', url: 'https://www.homegauge.com/one/pricing/', accessed: '2026-09-08' },
     },
     {
       text: 'Palm-Tech: $50 per user per month, or $500 per user per year, with every feature included at either price.',
-      source: { citation: 'Palm-Tech — Pricing', url: 'https://www.palmtech.com/pricing/', accessed: '2026-09-07' },
+      source: { citation: 'Palm-Tech — Pricing', url: 'https://www.palmtech.com/pricing/', accessed: '2026-09-08' },
     },
     {
       text: 'Tap Inspect publishes three prices: $7.50 per job pay-as-you-go, sold in blocks of 20 for $150; $90 per month for the Unlimited plan; and an Inspection Team plan headed "$45 / per user". At one inspector the calculator quotes whichever of pay-as-you-go and the $90 plan is cheaper at your volume.',
-      source: { citation: 'Tap Inspect — Pricing', url: 'https://www.tapinspect.com/pricing', accessed: '2026-09-07' },
+      source: { citation: 'Tap Inspect — Pricing', url: 'https://www.tapinspect.com/pricing', accessed: '2026-09-08' },
     },
     {
       text: 'On the Team plan the flat fee covers the first inspector and each further inspector adds $45 a month — "you are charged a flat fee for the 1st inspector who is typically the Team Owner ... Each inspector you invite to your Team results in an additional $45 per month on your Subscription." The same article states that pay-as-you-go is cheaper below 12 jobs a month and the Unlimited plan above it, which is exactly where $7.50 per job crosses $90.',
-      source: { citation: 'Tap Inspect — Help Centre, About Our Subscription Plans', url: 'https://help.tapinspect.com/hc/en-us/articles/360038266892-About-Our-Subscription-Plans', accessed: '2026-09-07' },
+      source: { citation: 'Tap Inspect — Help Centre, About Our Subscription Plans', url: 'https://help.tapinspect.com/hc/en-us/articles/360038266892-About-Our-Subscription-Plans', accessed: '2026-09-08' },
     },
   ],
   referenceTable: {
@@ -247,64 +284,120 @@ export const record: CalculatorRecord = {
     'One-time setup fees are excluded — Spectora charges $499 to set up its Base Website and Hive Inspect $299 — so a first year costs more than the annual figure shown.',
     'Introductory and promotional rates are excluded and every figure is the steady-state price. Hive Inspect\'s first three months run at $39, $59 and $79 before settling at $99, and most vendors offer a free trial.',
     'Annual prepay assumes twelve months paid up front. Where a vendor publishes no annual plan the annual figure is simply twelve monthly bills, not a discount that vendor offers.',
+    'The "what I pay now" row is your own figure and carries no source. It is priced as entered — twelve times the monthly number — and is not adjusted for volume or headcount, because nobody but you knows how your current bill responds to either.',
     'Counts subscription price only. Migration effort, the time spent learning a new tool, and the cost of getting your data out if you leave are real and are not in this figure.',
   ],
   examples: [
     {
-      label: 'Solo inspector on Spectora, 20 inspections/month',
+      label: 'Solo inspector, 20 inspections/month, Hive Inspect against Spectora and HomeGauge',
       inputs: {
-        vendor: 2, billing: 0, inspectionsPerMonth: 20, inspectors: 1, customSoftware: 0,
+        vendors: DEFAULT_VENDORS, billing: 0, inspectionsPerMonth: 20, inspectors: 1, customSoftware: 0,
         scheduling: 0, crm: 0, paymentsPercent: 3, monthlyRevenue: 8000, website: 58, phone: 30, ai: 0,
       },
     },
     {
-      label: 'Three-inspector firm on Hive Inspect prepaid annually, 60 inspections/month',
+      label: 'Three-inspector firm prepaying annually, 60 inspections/month, Hive Inspect against Spectora and ISN',
       inputs: {
-        vendor: 1, billing: 1, inspectionsPerMonth: 60, inspectors: 3, customSoftware: 0,
+        vendors: 1 + 2 + 8, billing: 1, inspectionsPerMonth: 60, inspectors: 3, customSoftware: 0,
         scheduling: 0, crm: 0, paymentsPercent: 3, monthlyRevenue: 24000, website: 58, phone: 30, ai: 0,
       },
     },
   ],
   related: ['home-inspection-software-pricing-calculator', 'cost-per-inspection-calculator', 'startup-cost-planner'],
   datePublished: '2026-09-03',
-  dateModified: '2026-09-07',
+  dateModified: '2026-09-08',
 };
 
-/** The chosen vendor's bill, both ways round. */
-function vendorCost(i: Record<string, number>) {
+/*
+  One priced row per ticked product, cheapest first.
+
+  Everything below reads from this, so the boxes and the table can never
+  disagree about which option won: they are the same sort of the same list.
+*/
+interface PricedRow {
+  name: string;
+  model: string;
+  /* What a year costs under the chosen billing — the sort key. */
+  annual: number;
+  bit: number;
+}
+
+function pricedRows(i: Record<string, number>): PricedRow[] {
   const n = i.inspectionsPerMonth;
   const k = i.inspectors;
+  const prepaid = i.billing === 1;
+  const mask = i.vendors;
 
-  if (i.vendor === CUSTOM_VENDOR_ID) {
-    return { monthly: i.customSoftware, annual: i.customSoftware * 12 };
+  const rows: PricedRow[] = VENDORS.filter((v) => (mask & v.bit) !== 0).map((v) => ({
+    name: v.name,
+    /* The caveat only bites once there is more than one seat to price. */
+    model: v.seatCaveat && k > 1 ? `${v.model} — ${v.seatCaveat}` : v.model,
+    annual: prepaid ? v.annual(n, k) : v.monthly(n, k) * 12,
+    bit: v.bit,
+  }));
+
+  /*
+    The reader's current bill, when they ticked it. Twelve times what they
+    typed and nothing more: an outside figure cannot be re-derived at a
+    different volume or headcount the way a published model can.
+  */
+  if ((mask & CUSTOM_BIT) !== 0) {
+    rows.push({
+      name: 'What I pay now',
+      model: 'Your own figure, as entered',
+      annual: i.customSoftware * 12,
+      bit: CUSTOM_BIT,
+    });
   }
-  const vendor = VENDORS.find((v) => v.id === i.vendor) ?? VENDORS[0];
-  return { monthly: vendor.monthly(n, k), annual: vendor.annual(n, k) };
+
+  return rows.sort((a, b) => a.annual - b.annual);
 }
 
 export function compute(i: Record<string, number>) {
-  const cost = vendorCost(i);
+  const rows = pricedRows(i);
+
+  /* Add-ons are outside the comparison on purpose: they are the same number
+     under every vendor, so folding them in would shrink every gap equally. */
+  const paymentFee = (i.paymentsPercent / 100) * i.monthlyRevenue;
+  const addOnsMonthly = i.scheduling + i.crm + paymentFee + i.website + i.phone + i.ai;
 
   /*
-    Prepaying does not change what the year costs per month, it changes what the
-    year costs — so the monthly figure under annual billing is the annual price
-    spread across twelve, which is what belongs in a monthly stack total.
+    Reachable only from a hand-edited link that ticks nothing — the widget
+    will not untick the last box, and the clamp floors ?vendors= at 1. Answer
+    it honestly rather than dividing by an empty list.
   */
-  const prepaid = i.billing === 1;
-  const softwareAnnual = prepaid ? cost.annual : cost.monthly * 12;
-  const softwareMonthly = softwareAnnual / 12;
+  if (rows.length === 0) {
+    return {
+      cheapest: '—',
+      cheapestMonthly: 0,
+      cheapestAnnual: 0,
+      dearest: '—',
+      annualDifference: 0,
+      addOnsMonthly: +addOnsMonthly.toFixed(2),
+      cheapestStackAnnual: +(addOnsMonthly * 12).toFixed(2),
+    };
+  }
 
-  const paymentFee = (i.paymentsPercent / 100) * i.monthlyRevenue;
-  const monthlyTotal = softwareMonthly + i.scheduling + i.crm + paymentFee + i.website + i.phone + i.ai;
-  const trueAnnualSoftwareSpend = monthlyTotal * 12;
-  const perInspectionSoftwareCost = i.inspectionsPerMonth > 0 ? monthlyTotal / i.inspectionsPerMonth : 0;
+  const cheapest = rows[0];
+  const dearest = rows[rows.length - 1];
+
+  /*
+    Prepaying does not change what the year costs per month, it changes what
+    the year costs — so the monthly figure under annual billing is the annual
+    price spread across twelve, which is what belongs beside a monthly stack.
+  */
+  const cheapestMonthly = cheapest.annual / 12;
 
   return {
-    softwareMonthly: +softwareMonthly.toFixed(2),
-    softwareAnnual: +softwareAnnual.toFixed(2),
-    monthlyTotal: +monthlyTotal.toFixed(2),
-    trueAnnualSoftwareSpend: +trueAnnualSoftwareSpend.toFixed(2),
-    perInspectionSoftwareCost: +perInspectionSoftwareCost.toFixed(2),
+    cheapest: cheapest.name,
+    cheapestMonthly: +cheapestMonthly.toFixed(2),
+    cheapestAnnual: +cheapest.annual.toFixed(2),
+    /* With one row ticked there is nothing to compare it to, and naming the
+       same product as both cheapest and dearest reads as a bug. */
+    dearest: rows.length > 1 ? dearest.name : '—',
+    annualDifference: +(dearest.annual - cheapest.annual).toFixed(2),
+    addOnsMonthly: +addOnsMonthly.toFixed(2),
+    cheapestStackAnnual: +((cheapestMonthly + addOnsMonthly) * 12).toFixed(2),
   };
 }
 
@@ -312,49 +405,40 @@ const whole = (n: number) => `$${n.toLocaleString('en-US', { maximumFractionDigi
 const cents = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 /*
-  Every vendor at the current inputs, cheapest first.
+  The comparison itself: one column per ticked product, cheapest column first
+  and marked, read across like a spec sheet.
+
+  Rows, not columns, was the first cut of this table, and it was the wrong way
+  round. A reader comparing three products wants them beside each other with the
+  figures lining up underneath — "Hive $99, Spectora $109, HomeGauge $89" on one
+  line — not stacked in a list they have to read down and hold in their head.
 
   Report software only — the website, phone and card-processing lines are
   identical whichever vendor you pick, so folding them in here would add the
-  same number to every row and make the gaps look smaller than they are.
+  same number to every column and make the gaps look smaller than they are.
 */
 export function computeTable(i: Record<string, number>): ResultTable {
-  const prepaid = i.billing === 1;
+  const rows = pricedRows(i);
   const n = i.inspectionsPerMonth;
   const k = i.inspectors;
+  const seats = `${k} inspector${k === 1 ? '' : 's'}`;
 
-  const rows = VENDORS.map((v) => {
-    const annual = prepaid ? v.annual(n, k) : v.monthly(n, k) * 12;
-    /* The caveat only bites once there is more than one seat to price. */
-    const model = v.seatCaveat && k > 1 ? `${v.model} — ${v.seatCaveat}` : v.model;
-    return { name: v.name, model, annual, id: v.id };
-  });
-
-  if (i.vendor === CUSTOM_VENDOR_ID && i.customSoftware > 0) {
-    rows.push({
-      name: 'Your own figure',
-      model: 'As entered above',
-      annual: i.customSoftware * 12,
-      id: CUSTOM_VENDOR_ID,
-    });
-  }
-
-  rows.sort((a, b) => a.annual - b.annual);
+  /* Column 0 holds the row labels, so a product's column is its index + 1. */
+  const cheapestColumn = rows.length > 0 ? 1 : undefined;
 
   return {
-    caption: prepaid
-      ? `Every vendor prepaid annually at ${n} inspections/mo, ${k} inspector${k === 1 ? '' : 's'}`
-      : `Every vendor billed monthly at ${n} inspections/mo, ${k} inspector${k === 1 ? '' : 's'}`,
-    columns: ['Software', 'Per month', 'Per year', 'Per inspection'],
-    rows: rows.map((r) => ({
-      cells: [
-        `${r.name} — ${r.model}`,
-        whole(r.annual / 12),
-        whole(r.annual),
-        cents(r.annual / 12 / n),
-      ],
-      selected: r.id === i.vendor,
-    })),
-    note: 'Report software only, rounded to the dollar. List prices — see the sources table below.',
+    caption: i.billing === 1
+      ? `Prepaid annually at ${n} inspections/mo, ${seats}`
+      : `Billed monthly at ${n} inspections/mo, ${seats}`,
+    columns: ['', ...rows.map((r) => r.name)],
+    rows: [
+      { cells: ['Per month', ...rows.map((r) => whole(r.annual / 12))] },
+      { cells: ['Per year', ...rows.map((r) => whole(r.annual))] },
+      { cells: ['Per inspection', ...rows.map((r) => cents(r.annual / 12 / n))] },
+      { cells: ["How it's priced", ...rows.map((r) => r.model)], prose: true },
+    ],
+    selectedColumn: cheapestColumn,
+    selectedLabel: 'cheapest',
+    note: 'Cheapest first, left to right, and highlighted. Report software only, rounded to the dollar — list prices, see the sources table below.',
   };
 }

@@ -45,14 +45,15 @@ for (const row of cpi.referenceTable!.rows) {
 
 /*
   software cost: one row per vendor, one column per monthly volume, showing the
-  report-software bill alone. The stack lines are zeroed so `softwareAnnual` is
+  report-software bill alone. The stack lines are zeroed so `cheapestAnnual` is
   compared against exactly what the table claims to show — the vendor's own
   charge, not the vendor plus a website and a card processor.
 
-  Row order is the vendor list's own order, so vendor id is the row index + 1.
-  A row inserted in the record without a matching vendor shifts every id below
-  it and the figures stop reproducing, which is the failure this is here to
-  catch.
+  Row order is the vendor list's own order, so the vendor on row i is the one
+  holding bit 1 << i — the calculator's selection is a bitmask, and ticking a
+  single bit leaves exactly one row to be cheapest. A row inserted in the
+  record without a matching vendor shifts every bit below it and the figures
+  stop reproducing, which is the failure this is here to catch.
 */
 const tcoBase = {
   billing: 0, inspectors: 1, customSoftware: 0,
@@ -61,8 +62,8 @@ const tcoBase = {
 const whole = (n: number) => `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 tco.referenceTable!.rows.forEach((row, i) => {
   [10, 20, 40].forEach((n, col) => {
-    const r = tC({ ...tcoBase, vendor: i + 1, inspectionsPerMonth: n });
-    eq(`software ${row[0]} @${n}/mo`, whole(r.softwareAnnual), row[col + 1]);
+    const r = tC({ ...tcoBase, vendors: 1 << i, inspectionsPerMonth: n });
+    eq(`software ${row[0]} @${n}/mo`, whole(r.cheapestAnnual), row[col + 1]);
   });
 });
 

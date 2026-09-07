@@ -132,6 +132,87 @@ a[href^='http'] {
   background: var(--om-paper);
 }
 
+/*
+  A heading inside the form, splitting a long stack of fields into groups. The
+  comparison inputs are the point of the software page; the eight add-on boxes
+  under them are optional detail, and without a break the reader meets all
+  twelve as one undifferentiated column.
+*/
+.calculator-section {
+  margin: 0.35rem 0 0.1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--om-ink-soft);
+  line-height: 1.35;
+}
+
+/* The wrapper a section heading and its field share. Adds nothing visually —
+   it exists so the heading and field stay one grid item and cannot be split. */
+.calculator-input-block {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+/* ---- a set of choices, as checkboxes ---- */
+
+/*
+  A fieldset carries browser defaults — a border, padding, a margin — that no
+  other control in this stack has. Stripped back to the same grid as a labelled
+  field so the group reads as one more row of the form.
+*/
+fieldset.calculator-choices {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+fieldset.calculator-choices > legend {
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+
+.calculator-choice-list {
+  display: grid;
+  gap: 0.1rem;
+  border: 1px solid var(--om-rule);
+  border-radius: 0.5rem;
+  background: var(--om-tile);
+  padding: 0.4rem 0.5rem;
+}
+
+/*
+  Row, not column: the whole row is the hit area, so a tick is a comfortable
+  target on a phone rather than a 13px box. `align-items: center` keeps the box
+  on the first line of a label that wraps.
+*/
+.calculator-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.32rem 0.15rem;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.calculator-choice input[type='checkbox'] {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.calculator-choice input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .calculator-input-help {
   color: var(--om-ink-soft);
   font-size: 0.78rem;
@@ -210,7 +291,10 @@ table.comparison-table {
 table.comparison-table th,
 table.comparison-table td {
   border-bottom: 1px solid var(--om-rule);
-  padding: 0.45rem 0.5rem;
+  /* Horizontal padding is 0.4rem rather than 0.5rem for the same reason the
+     row header lost a rem: four columns, a 359px rail and a scrollbar leave
+     nothing spare, and cell padding is the cheapest of the three to give up. */
+  padding: 0.45rem 0.4rem;
   text-align: left;
   vertical-align: top;
 }
@@ -232,11 +316,16 @@ table.comparison-table thead th {
 }
 
 /* The row header is the vendor name plus its pricing model, so it wraps and
-   carries the weight; the figures beside it are narrow and numeric. */
+   carries the weight; the figures beside it are narrow and numeric.
+
+   6rem, not the 7rem it was: the rail now scrolls inside itself on a desktop,
+   and the scrollbar takes 12px off the width the table has to work with —
+   enough to push the per-inspection column, the one an inspector carries into
+   their pricing, off the right edge. */
 table.comparison-table tbody th {
   font-weight: 600;
   line-height: 1.3;
-  min-width: 7rem;
+  min-width: 6rem;
 }
 
 table.comparison-table td {
@@ -245,14 +334,85 @@ table.comparison-table td {
   white-space: nowrap;
 }
 
-/* The row the picker above is currently set to. A left rule rather than a fill,
-   so the marker survives a forced-colours mode that drops backgrounds. */
+/* The cheapest row of the ones ticked above. The left rule, rather than the
+   fill alone, is what survives a forced-colours mode that drops backgrounds. */
 table.comparison-table tbody tr.is-selected {
   background: #eef1fb;
 }
 
 table.comparison-table tbody tr.is-selected th {
   box-shadow: inset 0.2rem 0 0 var(--accent);
+}
+
+/* ---- one product per column, read across ---- */
+
+/*
+  The transposed shape. Column headings are product names rather than field
+  labels, so they carry the weight the row headers carry in the other shape,
+  and the row headers become the quiet ones — they say what is being measured,
+  which the reader learns once and then stops reading.
+*/
+/* Cells are tighter than the row-per-product shape's: a column-per-product
+   table has one more column to fit in the same width, and the four columns of
+   the default view come to 313px against the 308px the tool has. */
+table.comparison-table.by-column th,
+table.comparison-table.by-column td {
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
+}
+
+table.comparison-table.by-column thead th {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--foreground);
+  vertical-align: bottom;
+}
+
+/* 4.5rem, so that the default three products and their labels fit the tool's
+   width exactly with no sideways scroll to discover. "Per inspection" wraps to
+   two lines at this width, which is the right thing to give up: it is a label
+   the reader reads once, and the figures beside it are what they came for. */
+table.comparison-table.by-column tbody th {
+  min-width: 4.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--om-ink-soft);
+}
+
+/*
+  The label column stays put while the products scroll past it. Past three
+  products the table is wider than the tool, and a figure with its label
+  scrolled off the left edge is just a number.
+*/
+table.comparison-table.by-column thead th:first-child,
+table.comparison-table.by-column tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--om-paper);
+}
+
+/* The cheapest product's column. The accent rule sits on the heading so the
+   mark survives a forced-colours mode that drops the fill. */
+table.comparison-table.by-column th.is-selected,
+table.comparison-table.by-column td.is-selected {
+  background: #eef1fb;
+}
+
+table.comparison-table.by-column thead th.is-selected {
+  box-shadow: inset 0 0.2rem 0 var(--accent);
+}
+
+/* The "how it's priced" row is words, not figures: it wraps, and it drops the
+   tabular monospace the money rows are set in. */
+table.comparison-table.by-column tr.is-prose td {
+  white-space: normal;
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--om-ink-soft);
 }
 
 .calculator-table-note {
@@ -785,10 +945,27 @@ table.reference-table td + td {
   gap: 1.25rem;
 }
 
+/*
+  A sticky element taller than the viewport pins its top and hides everything
+  past the bottom edge — there is no scroll left to reveal the rest, because the
+  rail is not moving. On the software cost page that hid the whole comparison
+  table: the tool is roughly 1,400px of checkboxes, fields, results and rows,
+  and only the first screenful of it could ever be seen.
+
+  Capping the rail at the viewport and letting it scroll inside itself keeps the
+  stick without the trap. On every shorter calculator the cap never binds and
+  nothing changes.
+*/
 @media (min-width: 1000px) {
   .calc-side-sticky {
     position: sticky;
     top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    /* Room for the focus ring on the first and last controls, which would
+       otherwise be clipped by the scroll container's edge. */
+    padding: 3px;
+    margin: -3px;
   }
 }
 
