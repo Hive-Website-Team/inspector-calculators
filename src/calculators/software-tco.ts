@@ -203,7 +203,7 @@ export const record: CalculatorRecord = {
     { key: 'crm', label: 'CRM', unit: '$/mo', default: 0, min: 0, max: 500 },
     { key: 'paymentsPercent', label: 'Payment processing fee', unit: '%', default: 3, min: 0, max: 10, help: 'Percent of card-processed revenue' },
     { key: 'monthlyRevenue', label: 'Monthly revenue processed via card', unit: '$/mo', default: 8000, min: 0, max: 200000 },
-    { key: 'website', label: 'Website', unit: '$/mo', default: 69, min: 0, max: 500, help: "Default is Spectora's Base Website at its own published monthly price, $69/mo — not $699/yr ÷ 12, which is the prepaid rate" },
+    { key: 'website', label: 'Website', unit: '$/mo', default: 69, min: 0, max: 500, help: 'Published inspector-website plans run about $29–$159/mo before setup fees; the default sits mid-range' },
     { key: 'phone', label: 'Phone / answering service', unit: '$/mo', default: 30, min: 0, max: 500 },
     { key: 'ai', label: 'AI tools', unit: '$/mo', default: 0, min: 0, max: 500 },
   ],
@@ -238,8 +238,12 @@ export const record: CalculatorRecord = {
       source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-08' },
     },
     {
-      text: "The website line's default is Spectora's Base Website, the one starter inspector site with a published price: $69 per month, or $699 per year prepaid. The monthly figure is used because the input is a monthly one — $699 ÷ 12 is $58, which is the prepay rate wearing a monthly label and understates what a month of that website actually bills. It is a starting point for a line every vendor's customers pay somewhere, not a recommendation.",
-      source: { citation: 'Spectora — Pricing, Base Website', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-08' },
+      text: "The website default, $69 a month, sits mid-range among the published inspector-website plans rather than following any one vendor. Spectora's Base Website is $69 a month or $699 a year and its Pro Website $159 a month or $1,599 a year. Monthly figures are used throughout because the input is a monthly one: dividing an annual prepay by twelve — $699 ÷ 12 is $58 — puts the discounted rate in a box labelled per month and understates what a month of that website actually bills.",
+      source: { citation: 'Spectora — Pricing, Website Add-Ons', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-08' },
+    },
+    {
+      text: "Hive Inspect publishes two website plans on the same page as its software: Basic Maintenance at $29 a month or $249 a year, and SEO Boost + Maintenance at $99 a month or $999 a year, each with a $299 setup fee. Taken with Spectora's two, the published range for an inspector website is roughly $29 to $159 a month before setup, which is the spread the $69 default sits inside.",
+      source: { citation: 'Hive Inspect — Pricing, Website Services', url: 'https://hiveinspect.com/pricing', accessed: '2026-09-08' },
     },
     {
       text: 'ISN: $7.25 per inspection for the first 50 each month, $5.50 for inspections 51 to 100, and $3.75 for 101 to 150. ISN charges no separate seat fee, so the ISN row does not move with inspector count.',
@@ -286,7 +290,8 @@ export const record: CalculatorRecord = {
     'ISN publishes tiers only to 150 inspections a month and directs higher volumes to sales; above 150 this keeps applying the third-tier rate, which is an extrapolation rather than a published price. ISN\'s $10 monthly minimum is applied.',
     'HomeGauge is the one vendor here whose multi-inspector price could not be established. It is absent from the pricing page, from that page\'s FAQ, and from every article in the HomeGauge support centre, so its row is held at the published solo figure and does not respond to the inspector count. That makes the HomeGauge row incomparable above one inspector rather than cheap — the row says so — and it has to be confirmed with HomeGauge directly. Note also that HomeGauge\'s own pricing page sells Spectora alongside it, and carries an FAQ on the difference between the two — treat those two rows as one company\'s two products rather than as independent competitors.',
     'Setup fees are excluded, and both of the ones known here are charged on a website service rather than on the report software: Spectora asks $499 to set up its Base Website, reduced to $100 if the website is bought annually alongside the software, and $799 on its Pro Website, waived on the same terms; Hive Inspect asks $299 to set up either of its website plans. Neither vendor charges a setup fee on the software subscription itself — Hive Inspect states so plainly — but if you buy a website alongside the software, your first year costs more than the annual figure shown.',
-    'Introductory and promotional rates are excluded and every figure is the steady-state price. Hive Inspect\'s first three months run at $39, $59 and $79 before settling at $99, and most vendors offer a free trial.',
+    'Introductory and promotional rates are excluded and every figure is the steady-state price. Hive Inspect\'s first three months run at $39, $59 and $79 before settling at $99, on a plan its pricing page restricts to a single-inspector business, and most vendors offer a free trial.',
+    'Two vendors sell reports in a block rather than as a plan, and neither is modelled as a column. Hive Inspect sells a 10 Reports Package for $99, which is $9.90 a report, as a one-time purchase for a single-inspector business rather than a subscription; Tap Inspect sells its pay-as-you-go inspections in blocks of 20 for $150. Both can be cheaper than any monthly plan for someone inspecting occasionally, and both stop being a plan at all once the block runs out, which is why they are named here rather than priced in the table.',
     'Annual prepay assumes twelve months paid up front. Where a vendor publishes no annual plan the annual figure is simply twelve monthly bills, not a discount that vendor offers.',
     'The "what I pay now" row is your own figure and carries no source. It is priced as entered — twelve times the monthly number — and is not adjusted for volume or headcount, because nobody but you knows how your current bill responds to either.',
     'Counts subscription price only. Migration effort, the time spent learning a new tool, and the cost of getting your data out if you leave are real and are not in this figure.',
