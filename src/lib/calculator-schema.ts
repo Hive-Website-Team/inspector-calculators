@@ -44,7 +44,28 @@ export const calculatorSchema = z.object({
     key: z.string(), label: z.string(), unit: z.string().optional(),
     default: z.number(), min: z.number(), max: z.number(), step: z.number().optional(),
     help: z.string().optional(),
-  })).min(1),
+    /*
+      A fixed set of choices — rendered as a <select> rather than a number box.
+
+      The values stay numeric on purpose. Everything downstream of an input is
+      built on numbers: the querystring sync that makes a result shareable, the
+      clamp that keeps a hand-edited link from poisoning the formula, and
+      compute()'s Record<string, number> signature. A string-valued input would
+      need all three reworked to gain nothing a lookup key cannot do.
+    */
+    options: z.array(z.object({ value: z.number(), label: z.string() })).min(2).optional(),
+  })
+    .refine((i) => !i.options || i.options.some((o) => o.value === i.default),
+      'default must be one of the declared options')
+    /*
+      The widget clamps every value to min..max, including one that arrived from
+      a <select>. An option sitting outside that range would be silently
+      rewritten to a different option the moment it was chosen — the field would
+      appear to ignore the click.
+    */
+    .refine((i) => !i.options || i.options.every((o) => o.value >= i.min && o.value <= i.max),
+      'every option value must fall within min..max, or the clamp will rewrite it'),
+  ).min(1),
   outputs: z.array(z.object({ key: z.string(), label: z.string(), unit: z.string().optional() })).min(1),
   /*
     A short, human first sentence and the meta description. The `definition`

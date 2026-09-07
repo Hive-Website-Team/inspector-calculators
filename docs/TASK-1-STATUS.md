@@ -28,7 +28,7 @@ page renders from the record; prose is secondary.
 | 2 | Revenue Goal → Inspections Needed | Business | Derived — stated derivation, no external citation |
 | 3 | Startup Cost Planner | Business | Spectora published pricing |
 | 4 | Cost Per Inspection | Pricing | Spectora published pricing |
-| 5 | Software Total Cost of Ownership | Pricing | Spectora published pricing |
+| 5 | Home Inspection Software Cost | Pricing | Hive Inspect · Spectora · ISN · HomeGauge · Palm-Tech · Tap Inspect published pricing |
 | 6 | Home Inspection Software Pricing | Pricing | Spectora · ISN · Palm-Tech published pricing |
 | 7 | Roof Pitch & Area | Roofing | IRC 2021 R905.2.2–R905.8.2 |
 | 8 | Attic Ventilation (NFA) | Roofing | IRC 2021 R806.2 |

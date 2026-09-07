@@ -43,19 +43,31 @@ for (const row of cpi.referenceTable!.rows) {
   eq(`cpi ${n} pct`, pct, row[3]);
 }
 
-// software tco: default stack
-const base = { reportSoftware: 109, scheduling: 0, crm: 0, paymentsPercent: 3, monthlyRevenue: 8000, website: 58, phone: 30, ai: 0, extraSeats: 0 };
-for (const row of tco.referenceTable!.rows) {
-  const n = Number(row[0]);
-  const r = tC({ ...base, inspectionsPerMonth: n });
-  eq(`tco ${n} monthly`, money(r.monthlyTotal), row[1]);
-  eq(`tco ${n} annual`, money(r.trueAnnualSoftwareSpend), row[2]);
-  eq(`tco ${n} per-insp`, money(r.perInspectionSoftwareCost), row[3]);
-}
+/*
+  software cost: one row per vendor, one column per monthly volume, showing the
+  report-software bill alone. The stack lines are zeroed so `softwareAnnual` is
+  compared against exactly what the table claims to show — the vendor's own
+  charge, not the vendor plus a website and a card processor.
+
+  Row order is the vendor list's own order, so vendor id is the row index + 1.
+  A row inserted in the record without a matching vendor shifts every id below
+  it and the figures stop reproducing, which is the failure this is here to
+  catch.
+*/
+const tcoBase = {
+  billing: 0, inspectors: 1, customSoftware: 0,
+  scheduling: 0, crm: 0, paymentsPercent: 0, monthlyRevenue: 0, website: 0, phone: 0, ai: 0,
+};
+const whole = (n: number) => `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+tco.referenceTable!.rows.forEach((row, i) => {
+  [10, 20, 40].forEach((n, col) => {
+    const r = tC({ ...tcoBase, vendor: i + 1, inspectionsPerMonth: n });
+    eq(`software ${row[0]} @${n}/mo`, whole(r.softwareAnnual), row[col + 1]);
+  });
+});
 
 // startup: default inputs, reserve months vary
 const s0 = { equipmentCost: 3000, insuranceCost: 2500, trainingCost: 1500, licensingCost: 300, softwareCost: 1308, marketingCost: 2000, monthlyOverhead: 3000 };
-const whole = (n: number) => `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 for (const row of sup.referenceTable!.rows) {
   const m = Number(row[0]);
   const r = sC({ ...s0, workingCapitalMonths: m });

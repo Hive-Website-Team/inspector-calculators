@@ -105,8 +105,9 @@ export function CalculatorWidget({ slug }: { slug: string }) {
   }, [inputs, mod, readDone]);
 
   if (!mod) return null;
-  const { record, compute } = mod;
+  const { record, compute, computeTable } = mod;
   const result = compute(inputs);
+  const table = computeTable?.(inputs);
 
   return (
     <div className="calculator-widget" data-hydrated-from-url={hydratedFromUrl}>
@@ -117,31 +118,53 @@ export function CalculatorWidget({ slug }: { slug: string }) {
               {input.label}
               {input.unit ? ` (${input.unit})` : ''}
             </span>
-            <input
-              type="number"
-              inputMode="decimal"
-              value={drafts[input.key] ?? String(inputs[input.key])}
-              min={input.min}
-              max={input.max}
-              step={input.step ?? 'any'}
-              onChange={(e) => {
-                const raw = e.target.value;
-                setDrafts((prev) => ({ ...prev, [input.key]: raw }));
-                // An empty or half-typed box ("-", "1e") keeps the last good
-                // number in the result rather than substituting zero.
-                const parsed = Number(raw);
-                if (raw !== '' && Number.isFinite(parsed)) {
-                  setInputs((prev) => ({ ...prev, [input.key]: clampFor(input.key, parsed) }));
+            {/*
+              A choice, not a quantity. No draft state: a <select> cannot hold a
+              half-typed value, so there is nothing to hold back from compute().
+            */}
+            {input.options ? (
+              <select
+                value={String(inputs[input.key])}
+                onChange={(e) =>
+                  setInputs((prev) => ({
+                    ...prev,
+                    [input.key]: clampFor(input.key, Number(e.target.value)),
+                  }))
                 }
-              }}
-              onBlur={() =>
-                setDrafts((prev) => {
-                  const next = { ...prev };
-                  delete next[input.key];
-                  return next;
-                })
-              }
-            />
+              >
+                {input.options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="number"
+                inputMode="decimal"
+                value={drafts[input.key] ?? String(inputs[input.key])}
+                min={input.min}
+                max={input.max}
+                step={input.step ?? 'any'}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  setDrafts((prev) => ({ ...prev, [input.key]: raw }));
+                  // An empty or half-typed box ("-", "1e") keeps the last good
+                  // number in the result rather than substituting zero.
+                  const parsed = Number(raw);
+                  if (raw !== '' && Number.isFinite(parsed)) {
+                    setInputs((prev) => ({ ...prev, [input.key]: clampFor(input.key, parsed) }));
+                  }
+                }}
+                onBlur={() =>
+                  setDrafts((prev) => {
+                    const next = { ...prev };
+                    delete next[input.key];
+                    return next;
+                  })
+                }
+              />
+            )}
             {input.help ? <small className="calculator-input-help">{input.help}</small> : null}
           </label>
         ))}
@@ -158,6 +181,47 @@ export function CalculatorWidget({ slug }: { slug: string }) {
           </div>
         ))}
       </div>
+
+      {/*
+        The comparison, when the calculator has one. Rendered on the server with
+        the record's defaults like everything else here, so the table is in the
+        HTML a crawler sees rather than appearing only once React hydrates.
+      */}
+      {table && (
+        <div className="calculator-table">
+          <p className="calculator-table-caption">{table.caption}</p>
+          <div className="table-scroll">
+            <table className="comparison-table">
+              <thead>
+                <tr>
+                  {table.columns.map((c) => (
+                    <th key={c} scope="col">
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.rows.map((row, i) => (
+                  <tr key={i} className={row.selected ? 'is-selected' : undefined}>
+                    {row.cells.map((cell, j) =>
+                      j === 0 ? (
+                        <th key={j} scope="row">
+                          {cell}
+                          {row.selected ? <span className="visually-hidden"> (selected)</span> : null}
+                        </th>
+                      ) : (
+                        <td key={j}>{cell}</td>
+                      ),
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {table.note ? <small className="calculator-table-note">{table.note}</small> : null}
+        </div>
+      )}
     </div>
   );
 }

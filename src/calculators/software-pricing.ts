@@ -55,7 +55,7 @@ export const record: CalculatorRecord = {
   limitations: [
     'Compares pricing models, not products. A cheaper model is not a better product, and feature sets across these plans are not equivalent.',
     'ISN publishes per-inspection tiers only up to 150 inspections per month; above that the calculator keeps applying the third-tier rate, which is an extrapolation rather than a published price. ISN also notes that monthly minimum fees may apply.',
-    'Excludes setup fees, payment-processing percentages, website add-ons, and anything billed outside the core plan. Use the software total cost of ownership calculator for a full recurring-spend figure.',
+    'Excludes setup fees, payment-processing percentages, website add-ons, and anything billed outside the core plan. Use the home inspection software cost calculator to price named vendors and total a full stack.',
     'Vendor prices are checked on the dates shown in the sources table and change without notice; re-check the linked pages before relying on a figure.',
   ],
   examples: [

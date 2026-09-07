@@ -110,7 +110,23 @@ a[href^='http'] {
   font-size: 1rem;
 }
 
-.calculator-input input:focus-visible {
+/* A choice field sits in the same stack as the number boxes, so it has to read
+   as the same control — same border, radius, padding and fill. Only the type
+   face differs: an option label is words, not digits. */
+.calculator-input select {
+  width: 100%;
+  border: 1px solid var(--om-rule);
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--om-tile);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.calculator-input input:focus-visible,
+.calculator-input select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
   background: var(--om-paper);
@@ -161,6 +177,102 @@ a[href^='http'] {
   /* Darker than --om-ink-soft: that grey measures 4.28:1 against the filled
      result box, which is under the 4.5:1 minimum. This is 6.0:1. */
   color: #545a72;
+}
+
+/* ---- the live comparison table inside the widget ---- */
+
+.calculator-table {
+  border-top: 1px solid var(--om-rule);
+  padding-top: 1.25rem;
+  /*
+    A grid item defaults to min-width:auto, so it refuses to shrink below its
+    content. Without this the four-column table pushes the whole widget wider
+    than the column it sits in and the *page* scrolls sideways on a phone,
+    instead of the table scrolling inside its own .table-scroll wrapper. Same
+    fix, and the same reason, as the min-width:0 on .calc-side and .calc-body.
+  */
+  min-width: 0;
+}
+
+.calculator-table-caption {
+  margin: 0 0 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+table.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+table.comparison-table th,
+table.comparison-table td {
+  border-bottom: 1px solid var(--om-rule);
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+/*
+  The headings wrap. They used to be nowrap, which forced "PER INSPECTION" onto
+  one line and pushed the table to 401px inside a 323px rail — so the fourth
+  column, the one an inspector actually carries into their pricing, sat off the
+  edge behind a horizontal scroll nobody would think to use. Two-line headings
+  bring all four columns into view.
+*/
+table.comparison-table thead th {
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--om-ink-soft);
+  line-height: 1.25;
+}
+
+/* The row header is the vendor name plus its pricing model, so it wraps and
+   carries the weight; the figures beside it are narrow and numeric. */
+table.comparison-table tbody th {
+  font-weight: 600;
+  line-height: 1.3;
+  min-width: 7rem;
+}
+
+table.comparison-table td {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The row the picker above is currently set to. A left rule rather than a fill,
+   so the marker survives a forced-colours mode that drops backgrounds. */
+table.comparison-table tbody tr.is-selected {
+  background: #eef1fb;
+}
+
+table.comparison-table tbody tr.is-selected th {
+  box-shadow: inset 0.2rem 0 0 var(--accent);
+}
+
+.calculator-table-note {
+  display: block;
+  margin-top: 0.7rem;
+  color: var(--om-ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 table.sources-table,
