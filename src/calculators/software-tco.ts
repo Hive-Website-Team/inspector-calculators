@@ -203,7 +203,7 @@ export const record: CalculatorRecord = {
     { key: 'crm', label: 'CRM', unit: '$/mo', default: 0, min: 0, max: 500 },
     { key: 'paymentsPercent', label: 'Payment processing fee', unit: '%', default: 3, min: 0, max: 10, help: 'Percent of card-processed revenue' },
     { key: 'monthlyRevenue', label: 'Monthly revenue processed via card', unit: '$/mo', default: 8000, min: 0, max: 200000 },
-    { key: 'website', label: 'Website', unit: '$/mo', default: 58, min: 0, max: 500, help: "Default is Spectora's Base Website plan, $699/yr ÷ 12" },
+    { key: 'website', label: 'Website', unit: '$/mo', default: 69, min: 0, max: 500, help: "Default is Spectora's Base Website at its own published monthly price, $69/mo — not $699/yr ÷ 12, which is the prepaid rate" },
     { key: 'phone', label: 'Phone / answering service', unit: '$/mo', default: 30, min: 0, max: 500 },
     { key: 'ai', label: 'AI tools', unit: '$/mo', default: 0, min: 0, max: 500 },
   ],
@@ -236,6 +236,10 @@ export const record: CalculatorRecord = {
     {
       text: 'Spectora Advanced is an add-on billed at $4 per inspection on top of the base plan, not a replacement for it, so the "Spectora + Advanced" row carries both charges.',
       source: { citation: 'Spectora — Pricing', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-08' },
+    },
+    {
+      text: "The website line's default is Spectora's Base Website, the one starter inspector site with a published price: $69 per month, or $699 per year prepaid. The monthly figure is used because the input is a monthly one — $699 ÷ 12 is $58, which is the prepay rate wearing a monthly label and understates what a month of that website actually bills. It is a starting point for a line every vendor's customers pay somewhere, not a recommendation.",
+      source: { citation: 'Spectora — Pricing, Base Website', url: 'https://www.spectora.com/pricing/', accessed: '2026-09-08' },
     },
     {
       text: 'ISN: $7.25 per inspection for the first 50 each month, $5.50 for inspections 51 to 100, and $3.75 for 101 to 150. ISN charges no separate seat fee, so the ISN row does not move with inspector count.',
@@ -281,7 +285,7 @@ export const record: CalculatorRecord = {
     'Every figure is a published list price, checked on the dates in the sources table and subject to change without notice. Re-check the linked pages before committing, and note that several vendors negotiate.',
     'ISN publishes tiers only to 150 inspections a month and directs higher volumes to sales; above 150 this keeps applying the third-tier rate, which is an extrapolation rather than a published price. ISN\'s $10 monthly minimum is applied.',
     'HomeGauge is the one vendor here whose multi-inspector price could not be established. It is absent from the pricing page, from that page\'s FAQ, and from every article in the HomeGauge support centre, so its row is held at the published solo figure and does not respond to the inspector count. That makes the HomeGauge row incomparable above one inspector rather than cheap — the row says so — and it has to be confirmed with HomeGauge directly. Note also that HomeGauge\'s own pricing page sells Spectora alongside it, and carries an FAQ on the difference between the two — treat those two rows as one company\'s two products rather than as independent competitors.',
-    'Setup fees are excluded, and both of the ones known here are charged on a website service rather than on the report software: Spectora asks $499 to set up its Base Website, Hive Inspect $299 to set up either of its website plans. Neither vendor charges a setup fee on the software subscription itself — Hive Inspect states so plainly — but if you buy a website alongside the software, your first year costs more than the annual figure shown.',
+    'Setup fees are excluded, and both of the ones known here are charged on a website service rather than on the report software: Spectora asks $499 to set up its Base Website, reduced to $100 if the website is bought annually alongside the software, and $799 on its Pro Website, waived on the same terms; Hive Inspect asks $299 to set up either of its website plans. Neither vendor charges a setup fee on the software subscription itself — Hive Inspect states so plainly — but if you buy a website alongside the software, your first year costs more than the annual figure shown.',
     'Introductory and promotional rates are excluded and every figure is the steady-state price. Hive Inspect\'s first three months run at $39, $59 and $79 before settling at $99, and most vendors offer a free trial.',
     'Annual prepay assumes twelve months paid up front. Where a vendor publishes no annual plan the annual figure is simply twelve monthly bills, not a discount that vendor offers.',
     'The "what I pay now" row is your own figure and carries no source. It is priced as entered — twelve times the monthly number — and is not adjusted for volume or headcount, because nobody but you knows how your current bill responds to either.',
@@ -292,14 +296,14 @@ export const record: CalculatorRecord = {
       label: 'Solo inspector, 20 inspections/month, Hive Inspect against Spectora and HomeGauge',
       inputs: {
         vendors: DEFAULT_VENDORS, billing: 0, inspectionsPerMonth: 20, inspectors: 1, customSoftware: 0,
-        scheduling: 0, crm: 0, paymentsPercent: 3, monthlyRevenue: 8000, website: 58, phone: 30, ai: 0,
+        scheduling: 0, crm: 0, paymentsPercent: 3, monthlyRevenue: 8000, website: 69, phone: 30, ai: 0,
       },
     },
     {
       label: 'Three-inspector firm prepaying annually, 60 inspections/month, Hive Inspect against Spectora and ISN',
       inputs: {
         vendors: 1 + 2 + 8, billing: 1, inspectionsPerMonth: 60, inspectors: 3, customSoftware: 0,
-        scheduling: 0, crm: 0, paymentsPercent: 3, monthlyRevenue: 24000, website: 58, phone: 30, ai: 0,
+        scheduling: 0, crm: 0, paymentsPercent: 3, monthlyRevenue: 24000, website: 69, phone: 30, ai: 0,
       },
     },
   ],
