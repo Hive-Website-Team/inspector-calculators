@@ -18,7 +18,25 @@ export const record: CalculatorRecord = {
     { key: 'treadShortBy', label: 'Tread short of the minimum by', unit: 'in' },
     { key: 'variationOverBy', label: 'Variation over the limit by', unit: 'in' },
   ],
+  summary:
+    'Check a stairway\'s riser height, tread depth and riser-to-riser variation against the IRC\'s limits.',
+
   formulaText: "Compares entered riser height, tread depth, and riser variation against the IRC's fixed limits: maximum riser 7¾ inches, minimum tread depth 10 inches, and maximum variation between the largest and smallest riser or tread in a flight of ⅜ inch.",
+
+  interpretation:
+    'Variation is the result to watch. A flight where every riser is uniformly tall is easier to walk than one with a single odd step, which is why the code caps the difference at ⅜ inch — a mismatched riser at the top or bottom of a flight is a trip hazard and the most common stair defect in older homes. Report the measured riser and tread alongside the limit so the finding is verifiable rather than a judgement call.',
+  referenceTable: {
+    caption: 'IRC 2021 stairway limits for one- and two-family dwellings',
+    columns: ['Dimension', 'Limit', 'Code section'],
+    rows: [
+      ['Maximum riser height', '7\u00be in', 'R311.7.5.1'],
+      ['Minimum tread depth', '10 in', 'R311.7.5.2'],
+      ['Maximum riser variation in a flight', '\u215c in', 'R311.7.5.1'],
+      ['Maximum tread variation in a flight', '\u215c in', 'R311.7.5.2'],
+    ],
+    note: 'Local amendments can tighten these; confirm the adopted edition with the authority having jurisdiction.',
+  },
+
   assumptions: [
     { text: 'Maximum riser height 7¾ inches, minimum tread depth 10 inches, and maximum riser/tread variation of ⅜ inch, for stairways serving one- and two-family dwellings.',
       source: { citation: 'IRC 2021 R311.7.5', url: 'https://codes.iccsafe.org/s/IRC2021P2/chapter-3-building-planning/IRC2021P2-Pt03-Ch03-SecR311.7.5', accessed: '2026-09-03' } },

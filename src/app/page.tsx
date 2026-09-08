@@ -1,8 +1,49 @@
+import type { Metadata } from 'next';
 import { calculators } from '@/calculators';
-import { CATEGORY_LABELS, categoryLabel } from '@/lib/categories';
+import { CATEGORY_LABELS, categoryBlurb, categoryLabel } from '@/lib/categories';
 import { categoryIcon } from '@/lib/category-icons';
 import { CalculatorSearch } from '@/components/calculator-search';
 import { HeroArcs } from '@/components/arcs';
+import { pageMetadata } from '@/lib/page-metadata';
+import { collectionPageSchema } from '@/lib/site';
+
+export const metadata: Metadata = pageMetadata({
+  title: 'Free calculators for home inspectors',
+  description:
+    'Free business and code-referenced calculators for professional home inspectors. Every formula names its source and the date it was checked.',
+  path: '/',
+});
+
+/**
+ * The little operator mark the reference sets beside the count — a red plus, a
+ * yellow minus and a blue division sign stacked into one glyph. Decoration.
+ */
+function MathGlyph() {
+  return (
+    <svg
+      className="home-hero-glyph"
+      width="30"
+      height="30"
+      viewBox="0 0 30 30"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g stroke="var(--om-red)" strokeWidth="2.6" strokeLinecap="round">
+        <path d="M4 7.5h8M8 3.5v8" />
+      </g>
+      <g stroke="var(--om-yellow)" strokeWidth="2.6" strokeLinecap="round">
+        <path d="M18 7.5h8" />
+      </g>
+      <g stroke="var(--om-blue)" strokeWidth="2.6" strokeLinecap="round">
+        <path d="M4 22.5h8" />
+        <path d="M18 19h8M18 26h8" />
+      </g>
+      <circle cx="8" cy="17" r="1.6" fill="var(--om-blue)" />
+      <circle cx="8" cy="28" r="1.6" fill="var(--om-blue)" />
+    </svg>
+  );
+}
 
 export default function HomePage() {
   const byCategory = new Map<string, typeof calculators>();
@@ -29,22 +70,46 @@ export default function HomePage() {
     return cut > 60 ? `${definition.slice(0, cut)}.` : definition;
   };
 
+  /* Every calculator on the site, enumerated for machines. The visible index
+     below says the same thing in anchor text; this says it in a form an answer
+     engine can read without parsing a card grid. */
+  const collectionJsonLd = collectionPageSchema({
+    name: 'All calculators',
+    description:
+      'Every calculator on Inspector Calculators, grouped by category. Each one states its formula, its assumptions and the primary source behind them.',
+    path: '/',
+    items: calculators.map(({ record }) => ({
+      slug: record.slug,
+      title: record.title,
+      definition: record.definition,
+    })),
+  });
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <div className="home-hero">
         {/* Omni's broken rings, cropped by the section edges. Decoration only. */}
         <HeroArcs />
         <div className="home-hero-inner">
           <div>
-            {/* Standards eyebrow — the electricaltoolbox.com pattern: state the
-                code edition and the no-signup promise before anything else. */}
-            <p className="home-eyebrow">Free · IRC 2021 · No signup</p>
+            {/* Three lines, as the reference sets them: a quiet lead-in, the
+                count at roughly three times its height in the accent blue, then
+                the noun. The little operator glyph rides beside the count. */}
             <h1 className="home-hero-title">
-              Every formula,
-              <br />
-              <span className="home-hero-count">{calculators.length} free</span>
-              <br />
-              calculators
+              {/*
+                The spans are blocks, so the line breaks are visual — but
+                `textContent` concatenates them, and raw-HTML parsers (which is
+                how GPTBot, ClaudeBot and CCBot fetch) read that string. Without
+                the explicit spaces this read "Built for home inspectors11 free
+                calculators". The {' '} entries are load-bearing.
+              */}
+              <span className="home-hero-lead">Built for home inspectors</span>{' '}
+              <span className="home-hero-count">
+                {calculators.length} free
+                <MathGlyph />
+              </span>{' '}
+              <span className="home-hero-word">calculators</span>
             </h1>
           </div>
           <div className="home-hero-search">
@@ -67,9 +132,9 @@ export default function HomePage() {
             </svg>
           </div>
         </div>
-      </div>
 
-
+      {/* The panel lives inside the hero section so the wash and the cropped
+          rings run down past it, as they do on the reference. */}
       <div className="home-panel">
         <p className="home-positioning">
           Free calculators for professional home inspectors. Every formula shows its source.
@@ -89,6 +154,7 @@ export default function HomePage() {
             );
           })}
         </div>
+      </div>
       </div>
 
       {/* Trust strip — states the sourcing promise as page furniture rather than
@@ -137,44 +203,61 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Dense categorized index — the calculator.net pattern named in TASK-1 §0
-          and §5: category headings, every calculator a link with a one-line
-          description, columns rather than cards, no decoration between the
-          reader and the list. */}
-      <section className="home-section">
-        <h2 className="home-section-title">All calculators</h2>
-        {/* Card grid, as in the Omni reference: title with a trailing arrow, a
-            short description, and the category as a quiet label at the foot.
-            The per-category grouping the previous list carried now lives in the
-            tiles above and on each /category page, so nothing was lost. */}
-        <div className="calc-grid">
-          {calculators.map(({ record }) => (
-            <a
-              key={record.slug}
-              href={`/${record.slug}`}
-              className="calc-card"
-              data-calculator-slug={record.slug}
-            >
-              <span className="calc-card-head">
-                <span className="calc-card-title">{record.title}</span>
-                <svg
-                  className="calc-card-arrow"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </span>
-              <span className="calc-card-desc">{blurb(record.definition)}</span>
-              <span className="calc-card-cat">{categoryLabel(record.category)}</span>
-            </a>
+      {/*
+        The categorized index TASK-1 §5 asks for — a category heading with an
+        icon, then every calculator in it as a link with a one-line description.
+        The card treatment is the Omni reference's; only the grouping is new, so
+        the section satisfies §5 without leaving the supplied design.
+      */}
+      <section className="home-section" id="all-calculators">
+        <div className="home-section-inner">
+          <h2 className="home-section-title">All calculators</h2>
+
+          {activeCategories.map((category) => (
+            <div key={category} className="calc-group">
+              <div className="calc-group-head">
+                <span className="calc-group-icon">{categoryIcon(category)}</span>
+                <h3 className="calc-group-title">
+                  <a href={`/category/${category}`}>{categoryLabel(category)}</a>
+                </h3>
+                <span className="calc-group-rule" aria-hidden="true" />
+                <span className="calc-group-count">
+                  {byCategory.get(category)!.length} calculator
+                  {byCategory.get(category)!.length === 1 ? '' : 's'}
+                </span>
+              </div>
+              <p className="calc-group-blurb">{categoryBlurb(category)}</p>
+
+              <div className="calc-grid">
+                {byCategory.get(category)!.map(({ record }) => (
+                  <a
+                    key={record.slug}
+                    href={`/${record.slug}`}
+                    className="calc-card"
+                    data-calculator-slug={record.slug}
+                  >
+                    <span className="calc-card-head">
+                      <span className="calc-card-title">{record.title}</span>
+                      <svg
+                        className="calc-card-arrow"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </span>
+                    <span className="calc-card-desc">{blurb(record.definition)}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </section>

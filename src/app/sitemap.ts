@@ -17,7 +17,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: absoluteUrl('/changelog'), lastModified: CONTENT_LAST_REVIEWED, priority: 0.4 },
   ];
 
-  const categoryRoutes: MetadataRoute.Sitemap = Object.keys(CATEGORY_LABELS).map((name) => ({
+  // Only categories that hold a calculator. An empty category page renders
+  // "No calculators in this category yet" — submitting that in the sitemap
+  // spends crawl budget teaching Google the site has holes, and the first crawl
+  // sets its opinion. They reappear the moment a calculator claims them.
+  const activeCategories = Object.keys(CATEGORY_LABELS).filter((name) =>
+    calculators.some((m) => m.record.category === name),
+  );
+
+  const categoryRoutes: MetadataRoute.Sitemap = activeCategories.map((name) => ({
     url: absoluteUrl(`/category/${name}`),
     lastModified: CONTENT_LAST_REVIEWED,
     priority: 0.6,

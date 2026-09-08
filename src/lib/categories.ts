@@ -47,3 +47,32 @@ export const CATEGORY_BLURBS: Record<string, string> = {
 export function categoryBlurb(category: string): string {
   return CATEGORY_BLURBS[category] ?? '';
 }
+
+/**
+ * What the calculators in a category are grounded in, and when an inspector
+ * reaches for them. Shown on the category page under its own heading — those
+ * pages were 152 words with no sectioning, which is thin for the hub layer of
+ * the site's hierarchy.
+ */
+export const CATEGORY_COVERAGE: Record<string, string> = {
+  business:
+    'These are the numbers behind running the company rather than inspecting a house: whether the year clears a profit after you have paid yourself, how many jobs a target income actually requires, and what it costs to start from nothing. Every figure is arithmetic on numbers you enter — no industry averages, no benchmarks borrowed from someone else\u2019s market. Reach for these when setting a price, planning a year, or deciding whether the business supports a second inspector.',
+  pricing:
+    'What a job costs you to deliver and what your software stack costs to keep. Vendor figures come from each vendor\u2019s own published pricing page with the date it was read, never from a sales conversation or a third-party roundup, so you can re-check any number against the linked source. Reach for these when a ticket price stops feeling right or a renewal quote arrives.',
+  roofing:
+    'Roof geometry and attic ventilation, worked against the 2021 International Residential Code. The pitch multiplier is trigonometry and holds anywhere; the minimum slopes and ventilation ratios are code, and the section number and edition are named on every result so a finding can be written up and defended. Reach for these from the roof or the attic hatch, on a phone.',
+  structure:
+    'Framing checks against the American Wood Council\u2019s prescriptive tables, at the load and service conditions the table assumes. A span that fails here is a structural finding rather than a maintenance note, so the assumed loads are stated in full and belong in the write-up alongside the measurement.',
+  safety:
+    'Stairs, guards and handrails against the 2021 IRC\u2019s dimensional limits \u2014 the fall-protection dimensions that account for a large share of injury claims in existing homes. Each result names the limit and the section it comes from, so a finding travels into the report with its citation attached rather than as a judgement call.',
+  electrical:
+    'Service load and circuit checks against NEC tables, cited by article and edition.',
+  plumbing:
+    'Fixture demand and water heater sizing against federal sizing guidance.',
+  hvac:
+    'Sizing and airflow, from manufacturer and code-referenced figures.',
+};
+
+export function categoryCoverage(category: string): string {
+  return CATEGORY_COVERAGE[category] ?? '';
+}
